@@ -1,0 +1,47 @@
+source_Dir="../lnPyLib"
+dest_Dir="Source/lnLib"
+
+    #- logger
+    Logger/ColoredLogger_V103.py          ColoredLogger.py ### rename it
+
+    #- subprocess
+    # System/checkingRunningProcess.py
+    System/subprocessLN.py
+
+    #- utils
+    Utils/lnUtils.py
+    Utils/dictUtils.py
+    # Utils/devicesDB_New_20230902.py         devicesDB.py
+    # Utils/devicesDB_sqLite.py
+
+    # files
+    files/FileLoader.py
+    files/File_csv.py
+    files/File_json.py
+    files/File_ini.py
+    files/File_yaml.py
+    # SQLite/SQLite_Class.py
+    # SQLite/SQLiteDB_Class.py
+    # SQLite/SQLiteTable_Class.py
+
+    excel/ln_Excel_Class.py
+
+
+
+# set_var@DB_VERSION_DIR='D20240626'
+# set_var@DB_VERSION_DIR='D20240906'
+# set_var@DB_VERSION_DIR='devices_V001'
+
+dest_Dir="links_conf"
+    ${HOME}/lnProfile/config/sysVars/system_variables.yaml                        system_variables.lnk.yaml
+    # ${HOME}/lnProfile/devicesDB/${DB_VERSION_DIR}/conf/devices_DBTables.yaml     devices_DBase.lnk.yaml
+
+
+
+dest_Dir="just_as_ref"
+    # ${HOME}/lnProfile/devicesDB/${DB_VERSION_DIR}/source                               "${DB_VERSION_DIR}_source"
+
+
+
+
+

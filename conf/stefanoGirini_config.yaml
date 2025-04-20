@@ -1,0 +1,30 @@
+# main configuration file
+
+# updated by ...: Loreto Notarantonio
+# Date .........: 20-04-2025 21.17.48
+
+
+
+
+# system_variables: !include system_variables.lnk.yaml#system_envars
+
+main:
+
+
+
+excel:
+    # !include devices_DBase.lnk.yaml
+    # !include "${HOME}/lnProfile/devicesDB/${DB_VERSION_DIR}/conf/devices_DBTable.yaml"
+    # excel_filename: "${HOME}/lnProfile/devicesDB/DevicesV003/devicesDB.ods"
+    # excel_filename: "${HOME}/ext_disk/Filu/Personali/Loreto/Office/Excel/Varie/Oliviero legna2024.xlsx"
+    # excel_filename: "/media/loreto/LnDisk_SD_ext4/Filu/GIT-REPO/Python/stefanoGirini/data/export_contratti.xls"
+    sheet:
+        name: Contratti
+        dict_main_key: "SPEEDY_CTR_ID"  # column used as primary_key for dictionary
+        valid_columns:
+            - SPEEDY_CTR_ID
+            - AGENTE
+            - PARTNER
+            - PRODOTTO
+            - ESITO
+
