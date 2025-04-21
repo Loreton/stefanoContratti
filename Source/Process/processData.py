@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 08.52.16
+# Date .........: 21-04-2025 09.18.50
 #
 
 
@@ -31,6 +31,8 @@ def setup(gVars: (dict, SimpleNamespace)):
     gv=gVars
     gv.logger.caller(__name__)
     gv.excelBook=None
+    gv.tmpPath="/tmp/stefanoGG"
+    Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
 
 
 
@@ -54,17 +56,32 @@ def readExcelSheet(excel_filename: str, sheet_name: str):
 ################################################################
 # Configurazioe dei reservation addresss (config host)
 ################################################################
-def processAgente(sheet_name: str, agente: str):
-    data = sheet_name.selectRecords(col_name="AGENTE", evaluation_string=f' in ["{agente}"] ', use_benedict=False)
+def processAgente1(sheet_name: str, nome_agente: str):
+    data = sheet_name.selectRecords(col_name="AGENTE", evaluation_string=f' in ["{nome_agente}"] ', use_benedict=False)
     d = dict()
-    d[agente] = dict()
-    ptr = d[agente]
 
     ### - creazione agente dictionary
     for key, value in data.items():
         contract_id = value.pop("SPEEDY_CTR_ID")
-        value.pop("AGENTE")
-        d[agente][contract_id] = value
+        # value.pop("AGENTE")
+        d[contract_id] = value
+
+    return benedict(d, keyattr_enabled=True, keyattr_dynamic=False)
+
+
+
+################################################################
+# Configurazioe dei reservation addresss (config host)
+################################################################
+def processAgente(d_src: dict, nome_agente: str):
+    d = dict()
+
+    ### - creazione agente dictionary
+    for key, value in d_src.items():
+        if value["AGENTE"] == nome_agente:
+            contract_id = value.pop("SPEEDY_CTR_ID")
+            # value.pop("AGENTE")
+            d[contract_id] = value
 
     return benedict(d, keyattr_enabled=True, keyattr_dynamic=False)
 
@@ -81,12 +98,22 @@ def processFile(gVars: dict):
     ### --- get my contracts list
     sh_contratti = readExcelSheet(excel_filename=excel_filename, sheet_name="Contratti")
     d_contratti  = sh_contratti.asDict(dict_main_key=None, filtered_columns=filtered_columns, use_benedict=True)
-    d_contratti.py()
+    # d_contratti.py()
+    dictUtils.toYaml(d=d_contratti, filepath=f"{gv.tmpPath}/stefanoGG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
 
 
-    agent_name="Mirko Mazzoni"
-    agente = processAgente(sheet_name=sh_contratti, agente=agent_name)
-    agente.py()
-    # import pdb; pdb.set_trace() # by Loreto
+
+    nomi_agenti = ["Mirko Mazzoni", "Emanuela Luciano"]
+    agents = benedict(keyattr_enabled=True, keyattr_dynamic=False)
+
+    for agent_name in nomi_agenti:
+        gv.logger.info("processing agent: %s", agent_name)
+        agents[agent_name] = processAgente(d_src=d_contratti, nome_agente=agent_name)
+        gv.logger.info("    found records: %s ", len(agents[agent_name].keys()))
+
+        ### save yaml to file
+        yaml_filename = f"{gv.tmpPath}/{agent_name.replace(' ', '_')}.yaml"
+        dictUtils.toYaml(d=agents[agent_name], title=agent_name, filepath=yaml_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+
