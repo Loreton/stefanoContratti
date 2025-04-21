@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 20-04-2025 20.08.28
+# Date .........: 21-04-2025 14.47.12
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-20_200828"
+    __ln_version__=f"{prj_name} version: V2025-04-21_144712"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.excel_filename))
 
@@ -102,17 +102,18 @@ if __name__ == '__main__':
     logger.info('------- Starting -----------')
     logger.warning(__ln_version__)
 
+    if not excelFilename.exists():
+        logger.error("file: %s doesn't exists", excelFilename)
+        sys.exit(1)
+
     # ----------------------------
     # ----- prepare global project variables
     # ----------------------------
     gv=prepare_gVars.setMainVars(logger=logger, input_args=args, prj_name=prj_name, search_paths=["conf", "links_conf"])
-    # os.environ["DB_VERSION_DIR"] = args.db_version_dir # if args.db_dir else Path(base_devicesdb_dir) / "D20240618"
 
     readConfig()
 
     processData.processFile(gVars=gv)
-    # excelBook = lnExcel.lnExcelBook_Class(excel_filename=args.excel_filename, use_benedict=True, logger=gv.logger)
-    # sheet = excelBook.getSheet(sheet_name=sheet_name, column_key=column_key)
 
     sys.exit()
 
