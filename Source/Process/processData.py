@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 20-04-2025 21.16.47
+# Date .........: 21-04-2025 08.49.17
 #
 
 
@@ -30,7 +30,7 @@ def setup(gVars: (dict, SimpleNamespace)):
     global gv
     gv=gVars
     gv.logger.caller(__name__)
-
+    gv.excelBook=None
 
 
 
@@ -39,17 +39,33 @@ def setup(gVars: (dict, SimpleNamespace)):
 ###########################################
 ### read devices from excel file
 ###########################################
-def readExcelSheet(filename: str, sheet_name: str, dict_main_key: str, filtered_columns: list=[]):
-    excelBook = lnExcel.lnExcelBook_Class(excel_filename=filename, logger=gv.logger )
-    sheet = excelBook.getSheet(sheet_name=sheet_name)
-    # contratti = sheet.asList()
-    # contratti = sheet.asDict(dict_main_key=dict_main_key, use_benedict=True)
-    contratti = sheet.asDict(dict_main_key=None, filtered_columns=filtered_columns, use_benedict=True)
-    return contratti
+def readExcelSheet(excel_filename: str, sheet_name: str):
+    if not gv.excelBook:
+        gv.excelBook = lnExcel.lnExcelBook_Class(excel_filename=excel_filename, logger=gv.logger )
+
+    return gv.excelBook.getSheet(sheet_name=sheet_name)
 
 
 
 
+
+
+
+################################################################
+# Configurazioe dei reservation addresss (config host)
+################################################################
+def processAgente(sheet_name: str, agente: str):
+    data = sheet_name.selectRecords(col_name="AGENTE", evaluation_string=f' in ["{agente}"] ', use_benedict=False)
+    d = dict()
+    d[agente] = dict()
+    ptr = d[agente]
+
+    ### - creazione agente dictionary
+    for key, value in data.items():
+        contract_id = value.pop("SPEEDY_CTR_ID")
+        d[agente][contract_id] = value
+
+    return benedict(d, keyattr_enabled=True, keyattr_dynamic=False)
 
 
 ################################################################
@@ -61,68 +77,17 @@ def processFile(gVars: dict):
     filtered_columns   = gv.excel_config.sheet.valid_columns
     dict_main_key      = gv.excel_config.sheet.dict_main_key
 
-#     ### --- retrieve remote file
-#     new_openwrt_data, host_domain_dict=getRemoteData(remote_file, retrieved_file)
-
-    # ### --- get my devices list
-    contratti=readExcelSheet(filename=excel_filename, sheet_name=sheet_name, dict_main_key=dict_main_key, filtered_columns=filtered_columns)
-    import pdb; pdb.set_trace() # by Loreto
-#     ip_devices = devices.selectRecords(col_name="ip", evaluation_string=' not in ["null", "", "-"] ')
-
-#     ### ----------------------------------
-#     ### merging current retrieved file with new definitions
-#     ### ----------------------------------
-#     dictUtils.toYaml(d=host_domain_dict, filepath="/tmp/host_domain_dict_before_merge.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-#     host_domain_dict=merge_data(target_data=host_domain_dict, new_rec=ip_devices)
-#     dictUtils.toYaml(d=host_domain_dict, filepath="/tmp/host_domain_dict_after_merge.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+    ### read devices from excel file
+    sh_contratti = readExcelSheet(excel_filename=excel_filename, sheet_name="Contratti")
+    d_contratti  = sh_contratti.asDict(dict_main_key=None, filtered_columns=filtered_columns, use_benedict=True)
 
 
-#     ### ----------------------------------
-#     ### convert dict to openwrt format
-#     ### ----------------------------------
-#     new_openwrt_data.extend(openwrtUtils.dictToSection(d=host_domain_dict["hosts"], section_type="host"))
-#     new_openwrt_data.extend(openwrtUtils.dictToSection(d=host_domain_dict["domains"], section_type="domain"))
-#     new_openwrt_data=lnUtils.remove_extra_blank_lines(data=new_openwrt_data)
 
-#     ### ----------------------------------
-#     ### write autogen file
-#     ### ----------------------------------
-#     lnUtils.dataToFile(filepath=autogen_file, data=new_openwrt_data, replace=True, onEditor=False)
-#     if gv.args.editor:
-#         os.system(f"/usr/bin/subl {retrieved_file} {autogen_file}")
+    # ### --- get my contracts list
+    # sh_contratti=readExcqelSheet(filename=excel_filename, sheet_name=sheet_name, dict_main_key=dict_main_key, filtered_columns=filtered_columns)
+    d_contratti.py()
 
-
-#     TAB=" "*5
-
-#     ### ----------------------------------
-#     ### - create a list of hosts record (BLANK separator) for script
-#     ### ----------------------------------
-#     rec_type="host"
-
-#     _format = "{:<30} {:<20} {:<20} {:<20} {:<10} {} "
-#     fields = _format.format("<name>",  "<ip>",  "<mac>", "<leasetime>",  "<dns>", "<rec_tyoe>")
-#     host_output=["# " + fields]
-#     host_output.append("# " + "-"*100)
-#     for key, record in host_domain_dict["hosts"].items():
-#         if gv.openwrt_version == "22_03":
-#             mac=record["mac"]
-#             dns="1"
-#         else:
-#             mac=record["mac"][0]
-#             dns=""
-
-#         host_output.append(f"  {_format}".format(record["name"], record["ip"], mac, record["leasetime"], dns, rec_type))
-#     lnUtils.dataToFile(data=host_output, filepath=gv.hosts_list, replace=True, write_datetime=True, onEditor=False)
-
-
-#     rec_type="domain"
-#     _format = "{:<30} {:<30} {} "
-#     fields = _format.format("<name>",  "<ip>", "<rec_tyoe>")
-#     domain_output=["# " + fields]
-#     domain_output.append("# " + "-"*70)
-
-#     for key, record in host_domain_dict["domains"].items():
-#         domain_output.append(f"  {_format}".format(record["name"], record["ip"], rec_type))
-#     lnUtils.dataToFile(data=domain_output, filepath=gv.domains_list, replace=True, write_datetime=True, onEditor=False)
-
-
+    agente01="Mirko Mazzoni"
+    agente = processAgente(sheet_name=sh_contratti, agente=agente01)
+    agente.py()
+    # import pdb; pdb.set_trace() # by Loreto
