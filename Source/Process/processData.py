@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 09.18.50
+# Date .........: 21-04-2025 09.26.34
 #
 
 
@@ -95,7 +95,9 @@ def processFile(gVars: dict):
     filtered_columns   = gv.excel_config.sheet.valid_columns
     dict_main_key      = gv.excel_config.sheet.dict_main_key
 
+    ### -------------------------------
     ### --- get my contracts list
+    ### -------------------------------
     sh_contratti = readExcelSheet(excel_filename=excel_filename, sheet_name="Contratti")
     d_contratti  = sh_contratti.asDict(dict_main_key=None, filtered_columns=filtered_columns, use_benedict=True)
     # d_contratti.py()
@@ -105,6 +107,9 @@ def processFile(gVars: dict):
 
 
 
+    ### -------------------------------------
+    ### --- estrazione dati per ogni agente
+    ### -------------------------------------
     nomi_agenti = ["Mirko Mazzoni", "Emanuela Luciano"]
     agents = benedict(keyattr_enabled=True, keyattr_dynamic=False)
 
@@ -116,4 +121,11 @@ def processFile(gVars: dict):
         ### save yaml to file
         yaml_filename = f"{gv.tmpPath}/{agent_name.replace(' ', '_')}.yaml"
         dictUtils.toYaml(d=agents[agent_name], title=agent_name, filepath=yaml_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+
+
+
+    ### -------------------------------------
+    ### --- estrazione dati per ogni partner
+    ### -------------------------------------
+    columnValueList(self, col_name="PRODOTT")
 
