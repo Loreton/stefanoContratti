@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 08.49.17
+# Date .........: 21-04-2025 08.52.16
 #
 
 
@@ -63,6 +63,7 @@ def processAgente(sheet_name: str, agente: str):
     ### - creazione agente dictionary
     for key, value in data.items():
         contract_id = value.pop("SPEEDY_CTR_ID")
+        value.pop("AGENTE")
         d[agente][contract_id] = value
 
     return benedict(d, keyattr_enabled=True, keyattr_dynamic=False)
@@ -77,17 +78,15 @@ def processFile(gVars: dict):
     filtered_columns   = gv.excel_config.sheet.valid_columns
     dict_main_key      = gv.excel_config.sheet.dict_main_key
 
-    ### read devices from excel file
+    ### --- get my contracts list
     sh_contratti = readExcelSheet(excel_filename=excel_filename, sheet_name="Contratti")
     d_contratti  = sh_contratti.asDict(dict_main_key=None, filtered_columns=filtered_columns, use_benedict=True)
-
-
-
-    # ### --- get my contracts list
-    # sh_contratti=readExcqelSheet(filename=excel_filename, sheet_name=sheet_name, dict_main_key=dict_main_key, filtered_columns=filtered_columns)
     d_contratti.py()
 
-    agente01="Mirko Mazzoni"
-    agente = processAgente(sheet_name=sh_contratti, agente=agente01)
+
+
+
+    agent_name="Mirko Mazzoni"
+    agente = processAgente(sheet_name=sh_contratti, agente=agent_name)
     agente.py()
     # import pdb; pdb.set_trace() # by Loreto
