@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 17.48.34
+# Date .........: 21-04-2025 19.02.02
 #
 
 
@@ -35,6 +35,11 @@ class lnExcel_Class():
 if __name__ == '__main__':
     # import pdb; pdb.set_trace() # by Loreto
     excel_data_df = pandas.read_excel('/tmp/prova01.xls', sheet_name='Agenti')
+    print(excel_data_df)
+    columns = excel_data_df.columns.ravel()
+    print(columns)
+    print('Excel Sheet to Dict:', excel_data_df.to_dict(orient='records'))
+    # print('Excel Sheet to JSON:', excel_data_df.to_json(orient='records'))
+    # print('Excel Sheet to CSV:\n', excel_data_df.to_csv(index=False))
 
     # print whole sheet data
-    print(excel_data_df)

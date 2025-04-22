@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 20-04-2025 08.45.35
+# Date .........: 21-04-2025 18.05.13
 
 import sys
 import os
@@ -82,7 +82,9 @@ def ParseInput(version: str):
     # sqlite load_from_file
     # ==================
     # load_parser.add_argument('--create-table', action='store_true', help='create/replace  table name')
-    parser.add_argument('--excel-filename', default=None, required=True,
+    parser.add_argument('--input-excel-filename', default=None, required=True,
+        help='filename containing records to be loaded. (default: %(default)s)\n')
+    parser.add_argument('--output-agenti-filename', default=None, required=True,
         help='filename containing records to be loaded. (default: %(default)s)\n')
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 16.25.43
+# Date .........: 21-04-2025 19.03.09
 #
 
 
@@ -17,23 +17,7 @@ import os
 import xlwt
 
 
-my_data = [
-    {
-        "name":"Testuser1",
-        "age":20,
-        "country":"India"
-    },
-    {
-        "name":"Testuser2",
-        "age":20,
-        "country":"Canada"
-    },
-    {
-        "name":"Testuser2",
-        "age":29,
-        "country":"USA"
-    },
-]
+def addLine(data, sheet_name):
 
 
 def writeExcel(data, filename, sheet_name):

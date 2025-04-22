@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 17.20.52
+# Date .........: 21-04-2025 18.09.03
 #
 
 
@@ -252,7 +252,8 @@ def partnerPerAgente(d_src: dict):
 # Configurazioe dei reservation addresss (config host)
 ################################################################
 def processFile(gVars: dict):
-    excel_filename     = gv.args.excel_filename
+    excel_filename     = gv.args.input_excel_filename
+    agenti_excel_filename     = gv.args.output_agenti_filename
     sheet_name         = gv.excel_config.sheet.name
     filtered_columns   = gv.excel_config.sheet.valid_columns
     # dict_main_key      = gv.excel_config.sheet.dict_main_key
@@ -297,5 +298,6 @@ def processFile(gVars: dict):
         # import pdb; pdb.set_trace() # by Loreto
         shAgentiAddLine(agent_name=agent_name, data=agent_result)
 
-    shAgentiAddLine(agent_name=agent_name, filename="/tmp/prova01.xls")
+    # shAgentiAddLine(agent_name=agent_name, filename="/tmp/prova01.xls")
+    shAgentiAddLine(agent_name=agent_name, filename=agenti_excel_filename)
 

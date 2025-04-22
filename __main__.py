@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 14.47.12
+# Date .........: 22-04-2025 17.34.00
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -77,16 +77,16 @@ def readConfig():
 if __name__ == '__main__':
     global gv
 
-    prj_name = "stefanoGirini"
+    prj_name = "stefanoG"
 
 
 
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-21_144712"
+    __ln_version__=f"{prj_name} version: V2025-04-22_173400"
     args=ParseInput(__ln_version__)
-    excelFilename = Path(os.path.expandvars(args.excel_filename))
+    excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 
     logger=setColoredLogger(logger_name=prj_name,
                             console_logger_level=args.log_console_level,
