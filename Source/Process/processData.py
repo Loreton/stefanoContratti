@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 18.09.03
+# Date .........: 22-04-2025 19.40.07
 #
 
 
 import sys; sys.dont_write_bytecode = True
 import os
-# from datetime import datetime
 from pathlib import Path
 from benedict import benedict
-# import shlex
-# import re
-# import csv
 from types import SimpleNamespace
 from enum import Enum
 
@@ -27,7 +23,8 @@ class COLS(Enum):
 # from subprocessLN import scp_get #, run_sh_get_output, ssh_runCommand, scp_put
 import lnUtils
 import dictUtils
-import ln_Excel_Class as lnExcel
+# import ln_Excel_Class as lnExcel
+from lnPandasExcel_Class import lnExcel_Class
 import xlwt
 
 sq="'"
@@ -38,7 +35,7 @@ def setup(gVars: (dict, SimpleNamespace)):
     gv=gVars
     gv.logger.caller(__name__)
     gv.excelBook=None
-    gv.tmpPath="/tmp/stefanoGG"
+    gv.tmpPath="/tmp/stefanoG"
     Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
 
 
@@ -115,11 +112,11 @@ def writeExcel(data, filename, sheet_name):
 ###########################################
 ### read devices from excel file
 ###########################################
-def readExcelSheet(excel_filename: str, sheet_name: str):
-    if not gv.excelBook:
-        gv.excelBook = lnExcel.lnExcelBook_Class(excel_filename=excel_filename, logger=gv.logger )
+# def readExcelSheet(excel_filename: str, sheet_name: str):
+#     if not gv.excelBook:
+#         gv.excelBook = lnExcel.lnExcelBook_Class(excel_filename=excel_filename, logger=gv.logger )
 
-    return gv.excelBook.getSheet(sheet_name=sheet_name)
+#     return gv.excelBook.getSheet(sheet_name=sheet_name)
 
 
 
@@ -251,11 +248,11 @@ def partnerPerAgente(d_src: dict):
 ################################################################
 # Configurazioe dei reservation addresss (config host)
 ################################################################
-def processFile(gVars: dict):
-    excel_filename     = gv.args.input_excel_filename
-    agenti_excel_filename     = gv.args.output_agenti_filename
-    sheet_name         = gv.excel_config.sheet.name
-    filtered_columns   = gv.excel_config.sheet.valid_columns
+def processExcelFile(gVars: dict):
+    excel_filename        = gv.args.input_excel_filename
+    agenti_excel_filename = gv.args.output_agenti_filename
+    sheet_name            = gv.excel_config.sheet.name
+    filtered_columns      = gv.excel_config.sheet.valid_columns
     # dict_main_key      = gv.excel_config.sheet.dict_main_key
 
 
@@ -263,9 +260,11 @@ def processFile(gVars: dict):
     ### -------------------------------
     ### --- get my contracts list
     ### -------------------------------
-    sh_contratti = readExcelSheet(excel_filename=excel_filename, sheet_name=sheet_name)
-    d_contratti  = sh_contratti.asDict(dict_main_key=None, filtered_columns=filtered_columns, use_benedict=True)
+    contratti_xls = lnExcel_Class(excel_filename=excel_filename, logger=gv.logger)
+    d_contratti  = contratti_xls.getSheet(0, usecols=None, convert_to="dict")
     dictUtils.toYaml(d=d_contratti, filepath=f"{gv.tmpPath}/stefanoGG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+    import pdb; pdb.set_trace() # by Loreto
+
 
 
 

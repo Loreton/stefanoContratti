@@ -3,13 +3,13 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 22-04-2025 17.34.00
+# Date .........: 22-04-2025 19.38.43
 
 import sys; sys.dont_write_bytecode=True
 import os
 from benedict import benedict
 from pathlib import Path
-
+import pandas as pd
 
 
 
@@ -37,10 +37,9 @@ from    ColoredLogger import setColoredLogger, testLogger
 from    ParseInput import ParseInput
 import  prepare_gVars
 import  FileLoader
-# import  loadFromFile
-# import  File_csv
-# import  checkDuplicates
 import  processData
+
+# from lnExcelPandas_Class import lnExcel_Class
 
 # https://docs.pyexcel.org/en/latest/
 
@@ -50,20 +49,13 @@ import  processData
 # -------------------------------
 def readConfig():
     global gv
-    os.environ["DB_NAME"]="devicesDB"
     config_file=f"{prj_name}_config.yaml"
-    gv.exit_on_config_file_not_found=True
 
     unresolved_fileout=f"{gv.tmp_dir}/unresolved_full_config.yaml"
     if not (full_config:=FileLoader.loadConfigurationData(config_file=config_file, save_yaml_on_file=unresolved_fileout) ):
         logger.error("Configuration data error")
-        sys.exit(1)
 
     gv.excel_config   = full_config.pop("excel") ### extrai la parte sqlite
-    # import pdb; pdb.set_trace() # by Loreto
-    # gv.sqlite_config  = full_config.pop("sqlite") ### extrai la parte sqlite
-    # gv.main_config    = full_config.pop("main") ### extrai la parte sqlite
-    # gv.openwrt_config = full_config.pop("openwrt") ### extrai la parte sqlite
 
 
 
@@ -84,7 +76,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-22_173400"
+    __ln_version__=f"{prj_name} version: V2025-04-22_193843"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 
@@ -111,9 +103,10 @@ if __name__ == '__main__':
     # ----------------------------
     gv=prepare_gVars.setMainVars(logger=logger, input_args=args, prj_name=prj_name, search_paths=["conf", "links_conf"])
 
+
     readConfig()
 
-    processData.processFile(gVars=gv)
+    processData.processExcelFile(gVars=gv)
 
     sys.exit()
 
