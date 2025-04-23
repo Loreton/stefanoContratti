@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 19.03.16
+# Date .........: 23-04-2025 16.00.21
 
 
 
@@ -9,6 +9,21 @@
 # system_variables: !include system_variables.lnk.yaml#system_envars
 
 main:
+
+StrutturaAziendale_sample:
+    Direttore:
+        Area Manager:
+            Manager Plus:
+                Manager:
+                    Team Manager:
+                        Agente:
+StrutturaAziendale:
+    !include_merge [
+                    "../data/Cesarino_director.yaml",
+                    "../data/Dibilio_director.yaml",
+                    "../data/Chiaravallotti_director.yaml",
+                    "../data/Guerriero_director.yaml"
+                    ]
 
 
 
@@ -18,6 +33,7 @@ excel:
     # excel_filename: "${HOME}/lnProfile/devicesDB/DevicesV003/devicesDB.ods"
     # excel_filename: "${HOME}/ext_disk/Filu/Personali/Loreto/Office/Excel/Varie/Oliviero legna2024.xlsx"
     # excel_filename: "/media/loreto/LnDisk_SD_ext4/Filu/GIT-REPO/Python/stefanoGirini/data/export_contratti.xls"
+
     sheet:
         name: Contratti
         valid_columns:
@@ -27,7 +43,11 @@ excel:
             - PRODOTTO
             - ESITO
 
-    esiti:
+    # -----------------------------------------------------------
+    # - keywords da verificare all'interno del campo ESITO
+    # - per permettere la catalogazione corretta dei contratti
+    # -----------------------------------------------------------
+    esito_keywords:
         exclude:
             - doppia prenotazione
             - ko < 12 mesi
