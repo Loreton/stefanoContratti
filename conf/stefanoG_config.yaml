@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 23-04-2025 16.00.21
+# Date .........: 24-04-2025 15.00.25
 
 
 
@@ -17,6 +17,26 @@ StrutturaAziendale_sample:
                 Manager:
                     Team Manager:
                         Agente:
+
+output_sheet:
+    # verranno creati tanti fogli con qhete colonne a scalare
+    colonne_gerarchia:
+        - Direttore
+        - Area Manager
+        - Manager Plus
+        - Manager
+        - Team Manager
+        - Agente
+
+    # saranno presenti in tutti i fogli con i dati sommati all'ultimo livello visualizzato nelle colonne precedenti
+    colonne_dati:
+        - Totale
+        - Confermati
+        - In attivazione
+        - Back
+        - RID
+        - xxxx
+
 StrutturaAziendale:
     !include_merge [
                     "../data/Cesarino_director.yaml",

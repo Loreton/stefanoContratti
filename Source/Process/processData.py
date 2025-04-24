@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 22-04-2025 19.40.07
+# Date .........: 24-04-2025 18.55.18
 #
 
 
@@ -11,6 +11,9 @@ from pathlib import Path
 from benedict import benedict
 from types import SimpleNamespace
 from enum import Enum
+
+
+
 
 class COLS(Enum):
     Agente            = 1
@@ -24,7 +27,8 @@ class COLS(Enum):
 import lnUtils
 import dictUtils
 # import ln_Excel_Class as lnExcel
-from lnPandasExcel_Class import lnExcel_Class
+# from lnPandasExcel_Class import lnExcel_Class
+from ln_pandasExcel_Class import workBbookClass, sheetClass
 import xlwt
 
 sq="'"
@@ -42,9 +46,9 @@ def setup(gVars: (dict, SimpleNamespace)):
 
 
 # Add sheet in workbook
-excelOutput = xlwt.Workbook()
-sh_agenti = excelOutput.add_sheet("Agenti")
-sh_agenti_rows = 0
+# excelOutput = xlwt.Workbook()
+# sh_agenti = excelOutput.add_sheet("Agenti")
+# sh_agenti_rows = 0
 
 
 
@@ -61,50 +65,85 @@ sh_agenti_rows = 0
 #                attivazione: 0
 #                back: 0
 #########################################################
-def shAgentiAddLine(agent_name, data: dict={}, filename: str=None):
-    global sh_agenti_rows, sh_agenti, excelOutput
+# def shAgentiAddLine(agent_name, data: dict={}, filename: str=None):
+#     global sh_agenti_rows, sh_agenti, excelOutput
 
-    # Now save the excel
-    if filename:
-        excelOutput.save(filename)
-        return
+#     # Now save the excel
+#     if filename:
+#         excelOutput.save(filename)
+#         return
 
-    if sh_agenti_rows==0:
-        sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , COLS.Agente.name)
-        sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , COLS.Partner.name)
-        sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , COLS.Esito_totale.name)
-        sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , COLS.Esito_completato.name)
-        sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , COLS.Esito_attivazione.name)
-        sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , COLS.Esito_back.name)
-        sh_agenti_rows += 1
+#     if sh_agenti_rows==0:
+#         sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , COLS.Agente.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , COLS.Partner.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , COLS.Esito_totale.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , COLS.Esito_completato.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , COLS.Esito_attivazione.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , COLS.Esito_back.name)
+#         sh_agenti_rows += 1
 
-    for partner, esiti in data.items():
-        sh_agenti_rows += 1
-        sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , agent_name)
-        sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , partner)
-        sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , esiti["totale"])
-        sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , esiti["confermato"])
-        sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , esiti["attivazione"])
-        sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , esiti["back"])
-
-
+#     for partner, esiti in data.items():
+#         sh_agenti_rows += 1
+#         sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , agent_name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , partner)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , esiti["totale"])
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , esiti["confermato"])
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , esiti["attivazione"])
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , esiti["back"])
 
 
 
 
 
-def writeExcel(data, filename, sheet_name):
-    # Create an object of the workbook
-
-    for row, value in enumerate(data):
-        sheet.write(row, 0, value["name"])
-        sheet.write(row, 1, value["age"])
-        sheet.write(row, 2, value["country"])
-
-    # Now save the excel
-    excel.save(filename)
 
 
+# def writeExcel(data, filename, sheet_name):
+#     # Create an object of the workbook
+
+#     for row, value in enumerate(data):
+#         sheet.write(row, 0, value["name"])
+#         sheet.write(row, 1, value["age"])
+#         sheet.write(row, 2, value["country"])
+
+#     # Now save the excel
+#     excel.save(filename)
+
+
+import itertools as it
+import collections as ct
+# import more_itertools as mit
+
+def chunks2(data, sep, n):
+    lst = data.split(sep)
+    return list(it.batched(lst, n))
+
+
+def chunks(data, sep, n):
+    """Yield successive n-sized chunks from lst."""
+    lst = data.split(sep)
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+def kp_to_list(keys: list=[], count=4):
+    separator='#'
+    # last=["", "", "", "", "", "", "", "", "", "", ""]
+    # last=keys[0].split(separator)
+    last=list(chunks(keys[0], separator, count))[0]
+    kp_list = []
+    kp_list.append(last)
+
+    for item in keys[1:]:
+        # row, *rest = item.split(separator, count)
+        row = list(chunks(item, separator, count))[0]
+        row = chunks2(item, separator, count)[0]
+        for i, col in enumerate(row):
+            if col == last[i]:
+                row[i] = ''
+            else:
+                last[i]=col
+        kp_list.append(row)
+
+    return kp_list
 
 
 
@@ -112,11 +151,110 @@ def writeExcel(data, filename, sheet_name):
 ###########################################
 ### read devices from excel file
 ###########################################
-# def readExcelSheet(excel_filename: str, sheet_name: str):
-#     if not gv.excelBook:
-#         gv.excelBook = lnExcel.lnExcelBook_Class(excel_filename=excel_filename, logger=gv.logger )
+def testExcel(gVars: dict):
+    excel_filename        = gv.args.input_excel_filename
+    agenti_excel_filename = gv.args.output_agenti_filename
+    sheet_name            = gv.excel_config.sheet.name
+    selected_columns      = gv.excel_config.sheet.valid_columns
 
-#     return gv.excelBook.getSheet(sheet_name=sheet_name)
+    if False:
+        ### benedict flatten
+        flat_data = gv.struttura_aziendale.flatten(separator="#")
+        print()
+        index=0
+        for k, v in flat_data.items():
+            index+=1
+            print(f"{index:04} - {k}: {v}")
+        print()
+
+    if True:
+        ### loreto flatten
+        separator='#'
+        flat_data = dictUtils.flattenT1(gv.struttura_aziendale, separator=separator)
+        print()
+        index=0
+        prev_row=["", "", "", "", "", "", "", "", "", "", ""]
+
+        kp_list = kp_to_list(list(flat_data.keys()))
+        for item in kp_list:
+            print(item)
+        import pdb; pdb.set_trace() # by Loreto
+        # for k, v in flat_data.items():
+
+
+        for k, v in flat_data.items():
+            index+=1
+            cur_row=k.split(separator)
+            for i, col in enumerate(cur_row):
+                if col == prev_row[i]:
+                    cur_row[i]='\t\t'
+            print(index, cur_row)
+            prev_row = cur_row
+            # for col in cur_row:
+            #     print(index, '\t', col)
+
+
+
+            # k_list=k.split(separator)
+
+        import pdb; pdb.set_trace() # by Loreto
+        print()
+        # import pdb; pdb.set_trace() # by Loreto
+
+        ### cerchiamo di creare la truttura su excel
+        prev_key=''
+        work_key=''
+        sep="#"
+        for index, kp in enumerate(kpaths):
+            work_key=kp
+            if work_key.startswith(prev_key):
+                work_key.replace(prev_key, ' ')
+            print(f"{index:04} - {work_key}")
+
+            prev_key=kp
+
+
+    if False:
+        kpaths = gv.struttura_aziendale.keypaths(indexes=False, sort=True)
+        print()
+        index=0
+        for kp in kpaths:
+            index+=1
+            print(f"{index:04} - {kp}")
+        print()
+
+
+        ### cerchiamo di creare la truttura su excel
+        prev_key=''
+        work_key=''
+        sep="#"
+        for index, kp in enumerate(kpaths):
+            work_key=kp
+            if work_key.startswith(prev_key):
+                work_key.replace(prev_key, ' ')
+            print(f"{index:04} - {work_key}")
+
+            prev_key=kp
+
+    print()
+
+    import pdb; pdb.set_trace() # by Loreto
+
+
+    print(flat_data)
+
+
+    ### --- lettura sheet contratti da excel
+    wb_contratti = workBbookClass(excel_filename=excel_filename, logger=gv.logger)
+    sh_contratti = sheetClass(wbClass=wb_contratti, sheet_name_nr=0)
+    dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
+    dictUtils.toYaml(d=dict_contratti, filepath=f"{gv.tmpPath}/stefanoG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+
+
+    db_flat_data = dict_contratti.flatten(separator="#")
+    print(db_flat_data)
+    sys.exit(1)
+
 
 
 
@@ -252,7 +390,7 @@ def processExcelFile(gVars: dict):
     excel_filename        = gv.args.input_excel_filename
     agenti_excel_filename = gv.args.output_agenti_filename
     sheet_name            = gv.excel_config.sheet.name
-    filtered_columns      = gv.excel_config.sheet.valid_columns
+    selected_columns      = gv.excel_config.sheet.valid_columns
     # dict_main_key      = gv.excel_config.sheet.dict_main_key
 
 

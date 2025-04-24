@@ -6,12 +6,25 @@
     "configurations": [
     
         {
-            "name": "Python Debugger: Current File with Arguments",
+            "name": "Current File no Arguments",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
+            "console": "integratedTerminal"
+            // "args": "${command:pickArgs}"
+        },
+    
+        {
+            "name": "contratti",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "__main__.py",
             "console": "integratedTerminal",
-            "args": "${command:pickArgs}"
+            "args": [
+                "--input-excel-filename=data/export_contratti.xls",
+                "--output-agenti-filename=/tmp/contratti_agenti.xls",
+            ],
+            "justMyCode": true
         }
     ]
 }

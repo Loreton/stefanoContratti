@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 23-04-2025 15.57.41
+# Date .........: 24-04-2025 15.00.17
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -57,6 +57,7 @@ def readConfig():
 
     gv.excel_config         = full_config.pop("excel") ### extrai la parte sqlite
     gv.struttura_aziendale  = full_config.pop("StrutturaAziendale") ### extrai la parte sqlite
+    gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
 
 
 
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-23_155741"
+    __ln_version__=f"{prj_name} version: V2025-04-24_150017"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 
@@ -102,6 +103,11 @@ if __name__ == '__main__':
 
 
     readConfig()
+
+    processData.testExcel(gVars=gv)
+    sys.exit()
+
+
 
     processData.processExcelFile(gVars=gv)
 
