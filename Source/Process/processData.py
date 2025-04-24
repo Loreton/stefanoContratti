@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 24-04-2025 18.55.18
+# Date .........: 24-04-2025 20.08.06
 #
 
 
@@ -110,7 +110,7 @@ def setup(gVars: (dict, SimpleNamespace)):
 
 
 import itertools as it
-import collections as ct
+# import collections as ct
 # import more_itertools as mit
 
 def chunks2(data, sep, n):
@@ -134,8 +134,11 @@ def kp_to_list(keys: list=[], count=4):
 
     for item in keys[1:]:
         # row, *rest = item.split(separator, count)
-        row = list(chunks(item, separator, count))[0]
+        # row = list(chunks(item, separator, count))[0]
         row = chunks2(item, separator, count)[0]
+        if isinstance(row, tuple):
+            row = list(row)
+        # import pdb; pdb.set_trace() # by Loreto
         for i, col in enumerate(row):
             if col == last[i]:
                 row[i] = ''
