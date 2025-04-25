@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 24-04-2025 15.00.17
+# Date .........: 25-04-2025 16.29.43
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -69,12 +69,10 @@ if __name__ == '__main__':
 
     prj_name = "stefanoG"
 
-
-
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-24_150017"
+    __ln_version__=f"{prj_name} version: V2025-04-25_162943"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 

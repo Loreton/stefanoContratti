@@ -2,7 +2,7 @@
 
 #===============================================
 # updated by ...: Loreto Notarantonio
-# Date .........: 24-04-2025 15.33.28
+# Date .........: 25-04-2025 16.37.55
 #===============================================
 
 import sys; sys.dont_write_bytecode=True
@@ -54,12 +54,10 @@ def setMainVars(logger, prj_name, input_args, type: str=None, search_paths: list
 
     import FileLoader;       FileLoader.setup(gVars=gv)
     import lnUtils;          lnUtils.setup(gVars=gv)
-    import subprocessLN;     subprocessLN.setup(gVars=gv)
+    # import subprocessLN;     subprocessLN.setup(gVars=gv)
     import dictUtils;        dictUtils.setup(gVars=gv)
-    # import checkDuplicates;  checkDuplicates.setup(gVars=gv)
-    # import ln_Excel_Class;   ln_Excel_Class.setup(gVars=gv)
-    # import openwrtUtils;     openwrtUtils.setup(gVars=gv)
-    import processData;     processData.setup(gVars=gv)
+    import processData;      processData.setup(gVars=gv)
+    import ln_pandasExcel_Class;     ln_pandasExcel_Class.setup(gVars=gv)
 
 
     return gv
