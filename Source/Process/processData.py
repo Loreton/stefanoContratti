@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 24-04-2025 20.08.06
+# Date .........: 25-04-2025 19.19.33
 #
 
 
@@ -23,13 +23,10 @@ class COLS(Enum):
     Esito_attivazione = 5
     Esito_back        = 6
 
-# from subprocessLN import scp_get #, run_sh_get_output, ssh_runCommand, scp_put
 import lnUtils
 import dictUtils
-# import ln_Excel_Class as lnExcel
-# from lnPandasExcel_Class import lnExcel_Class
 from ln_pandasExcel_Class import workBbookClass, sheetClass
-import xlwt
+# import xlwt
 
 sq="'"
 dq='"'
@@ -44,121 +41,48 @@ def setup(gVars: (dict, SimpleNamespace)):
 
 
 
+################################################################
+# array is list
+################################################################
+def areAllItemEmpy(array: list):
+    x=0
+    # empty = [x+1 for ele in array if ele=='']
+    for ele in array:
+        if ele == '':
+            x += 1
 
-# Add sheet in workbook
-# excelOutput = xlwt.Workbook()
-# sh_agenti = excelOutput.add_sheet("Agenti")
-# sh_agenti_rows = 0
-
-
-
-#########################################################
-#       sample of data
-#            Edison:
-#                totale: 38
-#                confermato: 10
-#                attivazione: 0
-#                back: 1
-#            Edison Business:
-#                totale: 2
-#                confermato: 0
-#                attivazione: 0
-#                back: 0
-#########################################################
-# def shAgentiAddLine(agent_name, data: dict={}, filename: str=None):
-#     global sh_agenti_rows, sh_agenti, excelOutput
-
-#     # Now save the excel
-#     if filename:
-#         excelOutput.save(filename)
-#         return
-
-#     if sh_agenti_rows==0:
-#         sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , COLS.Agente.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , COLS.Partner.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , COLS.Esito_totale.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , COLS.Esito_completato.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , COLS.Esito_attivazione.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , COLS.Esito_back.name)
-#         sh_agenti_rows += 1
-
-#     for partner, esiti in data.items():
-#         sh_agenti_rows += 1
-#         sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , agent_name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , partner)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , esiti["totale"])
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , esiti["confermato"])
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , esiti["attivazione"])
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , esiti["back"])
+    if x==len(array):
+        # print("all string empty in list")
+        return True
+    return False
 
 
+################################################################
+# array is list of list
+################################################################
+def remove_empty_arrays(lol: list):
+    result = [row for row in lol if not all(a is '' for a in row)]
 
-
-
-
-
-# def writeExcel(data, filename, sheet_name):
-#     # Create an object of the workbook
-
-#     for row, value in enumerate(data):
-#         sheet.write(row, 0, value["name"])
-#         sheet.write(row, 1, value["age"])
-#         sheet.write(row, 2, value["country"])
-
-#     # Now save the excel
-#     excel.save(filename)
-
-
-import itertools as it
-# import collections as ct
-# import more_itertools as mit
-
-def chunks2(data, sep, n):
-    lst = data.split(sep)
-    return list(it.batched(lst, n))
-
-
-def chunks(data, sep, n):
-    """Yield successive n-sized chunks from lst."""
-    lst = data.split(sep)
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
-
-def kp_to_list(keys: list=[], count=4):
-    separator='#'
-    # last=["", "", "", "", "", "", "", "", "", "", ""]
-    # last=keys[0].split(separator)
-    last=list(chunks(keys[0], separator, count))[0]
-    kp_list = []
-    kp_list.append(last)
-
-    for item in keys[1:]:
-        # row, *rest = item.split(separator, count)
-        # row = list(chunks(item, separator, count))[0]
-        row = chunks2(item, separator, count)[0]
-        if isinstance(row, tuple):
-            row = list(row)
-        # import pdb; pdb.set_trace() # by Loreto
-        for i, col in enumerate(row):
-            if col == last[i]:
-                row[i] = ''
-            else:
-                last[i]=col
-        kp_list.append(row)
-
-    return kp_list
+    import pdb; pdb.set_trace() # by Loreto
+    _array = array[:]
+    for index, item in enumerate(reversed(array)):
+        if areAllItemEmpy(item):
+            del array[index]
 
 
 
 
 ###########################################
 ### read devices from excel file
+### - portiamo la struttura in flatten
 ###########################################
 def testExcel(gVars: dict):
     excel_filename        = gv.args.input_excel_filename
     agenti_excel_filename = gv.args.output_agenti_filename
-    sheet_name            = gv.excel_config.sheet.name
-    selected_columns      = gv.excel_config.sheet.valid_columns
+    sheet_name            = gv.excel_config.source_sheet.name
+    selected_columns      = gv.excel_config.source_sheet.columns_to_be_extracted
+    colonne_gerarchia     = gv.excel_config.output_sheet.colonne_gerarchia
+    colonne_dati          = gv.excel_config.output_sheet.colonne_dati
 
     if False:
         ### benedict flatten
@@ -173,26 +97,33 @@ def testExcel(gVars: dict):
     if True:
         ### loreto flatten
         separator='#'
-        flat_data = dictUtils.flattenT1(gv.struttura_aziendale, separator=separator)
-        print()
-        index=0
-        prev_row=["", "", "", "", "", "", "", "", "", "", ""]
 
-        kp_list = kp_to_list(list(flat_data.keys()))
-        for item in kp_list:
-            print(item)
-        import pdb; pdb.set_trace() # by Loreto
-        # for k, v in flat_data.items():
+        ### dictionary flatten
+        flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator=separator)
+
+        ### prendi le colonne fino al TeamManager
+        for i in range(1, len(colonne_gerarchia)):
+            columns_data = dictUtils.flatten_keypaths_to_list(list(flatten_data.keys()), item_nrs=i)
+            for item in columns_data:
+                print(item)
+            print()
+            # remove_empty_arrays(columns_data)
+            result = [row for row in columns_data if not all(a is '' for a in row)]
+            for item in result:
+                print(item)
+            print()
+
+            import pdb; pdb.set_trace() # by Loreto
 
 
-        for k, v in flat_data.items():
-            index+=1
-            cur_row=k.split(separator)
-            for i, col in enumerate(cur_row):
-                if col == prev_row[i]:
-                    cur_row[i]='\t\t'
-            print(index, cur_row)
-            prev_row = cur_row
+        # for k, v in flatten_data.items():
+        #     index+=1
+        #     cur_row=k.split(separator)
+        #     for i, col in enumerate(cur_row):
+        #         if col == prev_row[i]:
+        #             cur_row[i]='\t\t'
+        #     print(index, cur_row)
+        #     prev_row = cur_row
             # for col in cur_row:
             #     print(index, '\t', col)
 

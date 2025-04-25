@@ -178,3 +178,4 @@ cython_debug/
 *.xls*
 data/
 lnLib_links/
+links_conf/

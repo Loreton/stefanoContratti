@@ -18,13 +18,14 @@
             "name": "contratti",
             "type": "debugpy",
             "request": "launch",
-            "program": "__main__.py",
+            // "python": "/home/loreto/lnProfile/.lnVenv/giriniContratti312/bin/python3",
+            "program": "${workspaceFolder}/__main__.py",
             "console": "integratedTerminal",
+            "justMyCode": true,
             "args": [
                 "--input-excel-filename=data/export_contratti.xls",
                 "--output-agenti-filename=/tmp/contratti_agenti.xls",
-            ],
-            "justMyCode": true
+            ]
         }
     ]
 }

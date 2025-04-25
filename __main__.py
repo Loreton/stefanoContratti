@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 25-04-2025 16.29.43
+# Date .........: 25-04-2025 18.07.17
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -39,9 +39,6 @@ import  prepare_gVars
 import  FileLoader
 import  processData
 
-# from lnExcelPandas_Class import lnExcel_Class
-
-# https://docs.pyexcel.org/en/latest/
 
 
 # -------------------------------
@@ -57,7 +54,7 @@ def readConfig():
 
     gv.excel_config         = full_config.pop("excel") ### extrai la parte sqlite
     gv.struttura_aziendale  = full_config.pop("StrutturaAziendale") ### extrai la parte sqlite
-    gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
+    # gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
 
 
 
@@ -72,7 +69,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-25_162943"
+    __ln_version__=f"{prj_name} version: V2025-04-25_180717"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 

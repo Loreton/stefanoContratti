@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 24-04-2025 15.00.25
+# Date .........: 25-04-2025 18.10.28
 
 
 
@@ -18,24 +18,6 @@ StrutturaAziendale_sample:
                     Team Manager:
                         Agente:
 
-output_sheet:
-    # verranno creati tanti fogli con qhete colonne a scalare
-    colonne_gerarchia:
-        - Direttore
-        - Area Manager
-        - Manager Plus
-        - Manager
-        - Team Manager
-        - Agente
-
-    # saranno presenti in tutti i fogli con i dati sommati all'ultimo livello visualizzato nelle colonne precedenti
-    colonne_dati:
-        - Totale
-        - Confermati
-        - In attivazione
-        - Back
-        - RID
-        - xxxx
 
 StrutturaAziendale:
     !include_merge [
@@ -54,9 +36,29 @@ excel:
     # excel_filename: "${HOME}/ext_disk/Filu/Personali/Loreto/Office/Excel/Varie/Oliviero legna2024.xlsx"
     # excel_filename: "/media/loreto/LnDisk_SD_ext4/Filu/GIT-REPO/Python/stefanoGirini/data/export_contratti.xls"
 
-    sheet:
+    # verranno creati tanti fogli con qhete colonne a scalare
+    output_sheet:
+        colonne_gerarchia:
+            - Direttore
+            - Area Manager
+            - Manager Plus
+            - Manager
+            - Team Manager
+            - Agente
+
+        # saranno presenti in tutti i fogli con i dati sommati all'ultimo livello visualizzato nelle colonne precedenti
+        colonne_dati:
+            - Totale
+            - Confermati
+            - In attivazione
+            - Back
+            - RID
+            - xxxx
+
+
+    source_sheet:
         name: Contratti
-        valid_columns:
+        columns_to_be_extracted:
             - SPEEDY_CTR_ID
             - AGENTE
             - PARTNER
