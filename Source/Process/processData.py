@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 25-04-2025 19.19.33
+# Date .........: 26-04-2025 21.21.43
 #
 
 
@@ -11,8 +11,9 @@ from pathlib import Path
 from benedict import benedict
 from types import SimpleNamespace
 from enum import Enum
+import pandas as pd
 
-
+import ln_pandasExcel_Class as lnExcel
 
 
 class COLS(Enum):
@@ -41,33 +42,33 @@ def setup(gVars: (dict, SimpleNamespace)):
 
 
 
-################################################################
-# array is list
-################################################################
-def areAllItemEmpy(array: list):
-    x=0
-    # empty = [x+1 for ele in array if ele=='']
-    for ele in array:
-        if ele == '':
-            x += 1
+# ################################################################
+# # array is list
+# ################################################################
+# def areAllItemEmpy(array: list):
+#     x=0
+#     # empty = [x+1 for ele in array if ele=='']
+#     for ele in array:
+#         if ele == '':
+#             x += 1
 
-    if x==len(array):
-        # print("all string empty in list")
-        return True
-    return False
+#     if x==len(array):
+#         # gv.logger.info("all string empty in list")
+#         return True
+#     return False
 
 
-################################################################
-# array is list of list
-################################################################
-def remove_empty_arrays(lol: list):
-    result = [row for row in lol if not all(a is '' for a in row)]
+# ################################################################
+# # array is list of list
+# ################################################################
+# def remove_empty_arrays(lol: list):
+#     result = [row for row in lol if not all(a is '' for a in row)]
 
-    import pdb; pdb.set_trace() # by Loreto
-    _array = array[:]
-    for index, item in enumerate(reversed(array)):
-        if areAllItemEmpy(item):
-            del array[index]
+#     import pdb; pdb.set_trace() # by Loreto
+#     _array = array[:]
+#     for index, item in enumerate(reversed(array)):
+#         if areAllItemEmpy(item):
+#             del array[index]
 
 
 
@@ -87,34 +88,50 @@ def testExcel(gVars: dict):
     if False:
         ### benedict flatten
         flat_data = gv.struttura_aziendale.flatten(separator="#")
-        print()
+        gv.logger.info("")
         index=0
         for k, v in flat_data.items():
             index+=1
-            print(f"{index:04} - {k}: {v}")
-        print()
+            gv.logger.info(f"{index:04} - {k}: {v}")
+        gv.logger.info("")
 
     if True:
         ### loreto flatten
         separator='#'
 
         ### dictionary flatten
-        flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator=separator)
+        flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator=separator, index=True)
+        for item in flatten_data:
+            gv.logger.info(item)
+
+        import pdb; pdb.set_trace() # by Loreto
+        # flatten_data = dict(sorted(flatten_data.items()))
 
         ### prendi le colonne fino al TeamManager
-        for i in range(1, len(colonne_gerarchia)):
-            columns_data = dictUtils.flatten_keypaths_to_list(list(flatten_data.keys()), item_nrs=i)
+        for i in range(0, len(colonne_gerarchia)):
+            sheet_name=colonne_gerarchia[i]
+            columns_data = dictUtils.flatten_keypaths_to_list(list(flatten_data.keys()), item_nrs=i+1, remove_enpty_array=True)
             for item in columns_data:
-                print(item)
-            print()
-            # remove_empty_arrays(columns_data)
-            result = [row for row in columns_data if not all(a is '' for a in row)]
+                gv.logger.info(item)
+            gv.logger.info("")
+            # import pdb; pdb.set_trace() # by Loreto
+            # remove_empty_array items (columns_data)
+            # result = [row for row in columns_data if not all(a is '' for a in row)]
+            result=columns_data
             for item in result:
-                print(item)
-            print()
+                gv.logger.info(item)
+            gv.logger.info("")
+            # index   = [ 'row 1', 'row 2'],     # row name se serve (index = True in to_excel())
+            df = pd.DataFrame(
+                    columns = colonne_gerarchia[:i+1],
+                    data    = result
+                )
 
-            import pdb; pdb.set_trace() # by Loreto
 
+            lnExcel.addSheets(filename=gv.args.output_agenti_filename, sheets=[sheet_name], dataFrames=[df], sheet_exists="replace", mode='a')
+            lnExcel.setColumnSize(file_path=gv.args.output_agenti_filename, sheetname=sheet_name)
+
+        import pdb; pdb.set_trace() # by Loreto
 
         # for k, v in flatten_data.items():
         #     index+=1
@@ -122,17 +139,17 @@ def testExcel(gVars: dict):
         #     for i, col in enumerate(cur_row):
         #         if col == prev_row[i]:
         #             cur_row[i]='\t\t'
-        #     print(index, cur_row)
+        #     gv.logger.info(index, cur_row)
         #     prev_row = cur_row
             # for col in cur_row:
-            #     print(index, '\t', col)
+            #     gv.logger.info(index, '\t', col)
 
 
 
             # k_list=k.split(separator)
 
         import pdb; pdb.set_trace() # by Loreto
-        print()
+        gv.logger.info("")
         # import pdb; pdb.set_trace() # by Loreto
 
         ### cerchiamo di creare la truttura su excel
@@ -143,19 +160,19 @@ def testExcel(gVars: dict):
             work_key=kp
             if work_key.startswith(prev_key):
                 work_key.replace(prev_key, ' ')
-            print(f"{index:04} - {work_key}")
+            gv.logger.info(f"{index:04} - {work_key}")
 
             prev_key=kp
 
 
     if False:
         kpaths = gv.struttura_aziendale.keypaths(indexes=False, sort=True)
-        print()
+        gv.logger.info("")
         index=0
         for kp in kpaths:
             index+=1
-            print(f"{index:04} - {kp}")
-        print()
+            gv.logger.info(f"{index:04} - {kp}")
+        gv.logger.info("")
 
 
         ### cerchiamo di creare la truttura su excel
@@ -166,16 +183,16 @@ def testExcel(gVars: dict):
             work_key=kp
             if work_key.startswith(prev_key):
                 work_key.replace(prev_key, ' ')
-            print(f"{index:04} - {work_key}")
+            gv.logger.info(f"{index:04} - {work_key}")
 
             prev_key=kp
 
-    print()
+    gv.logger.info("")
 
     import pdb; pdb.set_trace() # by Loreto
 
 
-    print(flat_data)
+    gv.logger.info(flat_data)
 
 
     ### --- lettura sheet contratti da excel
@@ -186,7 +203,7 @@ def testExcel(gVars: dict):
 
 
     db_flat_data = dict_contratti.flatten(separator="#")
-    print(db_flat_data)
+    gv.logger.info(db_flat_data)
     sys.exit(1)
 
 

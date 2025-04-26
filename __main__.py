@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 25-04-2025 18.07.17
+# Date .........: 26-04-2025 21.19.18
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -64,12 +64,13 @@ def readConfig():
 if __name__ == '__main__':
     global gv
 
+
     prj_name = "stefanoG"
 
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-25_180717"
+    __ln_version__=f"{prj_name} version: V2025-04-26_211918"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 
@@ -88,8 +89,8 @@ if __name__ == '__main__':
     logger.warning(__ln_version__)
 
     if not excelFilename.exists():
-        logger.error("file: %s doesn't exists", excelFilename)
-        sys.exit(1)
+        logger.warning("file: %s doesn't exists", excelFilename)
+        #sys.exit(1)
 
     # ----------------------------
     # ----- prepare global project variables

@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 25-04-2025 18.10.28
+# Date .........: 26-04-2025 20.59.30
 
 
 
@@ -21,10 +21,10 @@ StrutturaAziendale_sample:
 
 StrutturaAziendale:
     !include_merge [
-                    "../data/Cesarino_director.yaml",
-                    "../data/Dibilio_director.yaml",
-                    "../data/Chiaravallotti_director.yaml",
-                    "../data/Guerriero_director.yaml"
+                    "../data/direttore_Cesarino.yaml",
+                    "../data/direttore_Dibilio.yaml",
+                    "../data/direttore_Chiaravallotti.yaml",
+                    "../data/direttore_Guerriero.yaml"
                     ]
 
 

@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 25-04-2025 16.39.18
+# Date .........: 26-04-2025 21.23.36
 
 
 
@@ -21,7 +21,15 @@ import Source.Main.zipLnLib as ZIP
 # - anche con il progetto zipped
 # -------------------------
 _my_path=[]
+
 def set_path():
+
+    no_lnlib_zip=False
+    if "--nolnlibzip" in sys.argv:
+        sys.argv.remove("--nolnlibzip")
+        no_lnlib_zip=True
+
+
     script_name=Path(sys.argv[0]).resolve()
 
     if script_name.suffix == '.zip': # sono all'interno dello zip
@@ -44,7 +52,10 @@ def set_path():
     # _my_path.append(f'{prj_dir}/Source/Modules')
     _my_path.append(f'{prj_dir}/Source/Process')
     # _my_path.append(f'{prj_dir}/Source/lnLib') ## non dovrebbe servire perché ci appoggiamo alla lnLib.zip
-    _my_path.append(f'{prj_dir}/Source/LnLib.zip')
+    if no_lnlib_zip:
+        _my_path.append(f'{prj_dir}/Source/lnLib_links') ## non dovrebbe servire perché ci appoggiamo alla lnLib.zip
+    else:
+        _my_path.append(f'{prj_dir}/Source/LnLib.zip')
 
 
 
