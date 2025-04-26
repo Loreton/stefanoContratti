@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 26-04-2025 21.21.43
+# Date .........: 26-04-2025 21.41.52
 #
 
 
@@ -104,7 +104,7 @@ def testExcel(gVars: dict):
         for item in flatten_data:
             gv.logger.info(item)
 
-        import pdb; pdb.set_trace() # by Loreto
+        # import pdb; pdb.set_trace() # by Loreto
         # flatten_data = dict(sorted(flatten_data.items()))
 
         ### prendi le colonne fino al TeamManager
@@ -115,9 +115,10 @@ def testExcel(gVars: dict):
                 gv.logger.info(item)
             gv.logger.info("")
             # import pdb; pdb.set_trace() # by Loreto
-            # remove_empty_array items (columns_data)
-            # result = [row for row in columns_data if not all(a is '' for a in row)]
-            result=columns_data
+
+            ### --- remove_empty_array items (columns_data)
+            result = [row for row in columns_data if not all(a is '-' for a in row)]
+            # result=columns_data
             for item in result:
                 gv.logger.info(item)
             gv.logger.info("")
