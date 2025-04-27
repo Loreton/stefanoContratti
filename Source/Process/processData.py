@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 26-04-2025 21.41.52
+# Date .........: 27-04-2025 16.06.51
 #
 
 
@@ -77,6 +77,7 @@ def setup(gVars: (dict, SimpleNamespace)):
 ### read devices from excel file
 ### - portiamo la struttura in flatten
 ###########################################
+'''
 def testExcel(gVars: dict):
     excel_filename        = gv.args.input_excel_filename
     agenti_excel_filename = gv.args.output_agenti_filename
@@ -110,15 +111,18 @@ def testExcel(gVars: dict):
         ### prendi le colonne fino al TeamManager
         for i in range(0, len(colonne_gerarchia)):
             sheet_name=colonne_gerarchia[i]
-            columns_data = dictUtils.flatten_keypaths_to_list(list(flatten_data.keys()), item_nrs=i+1, remove_enpty_array=True)
-            for item in columns_data:
+            rows_data = dictUtils.flatten_keypaths_to_list(list(flatten_data.keys()), item_nrs=i+1, remove_enpty_array=True)
+            for item in rows_data:
                 gv.logger.info(item)
             gv.logger.info("")
             # import pdb; pdb.set_trace() # by Loreto
 
             ### --- remove_empty_array items (columns_data)
-            result = [row for row in columns_data if not all(a is '-' for a in row)]
-            # result=columns_data
+            result = [row for row in rows_data if not all(a == '-' for a in row)]
+            ### --- insert bleank row if all cols have a value
+            end_of_director = [xxx for index, row in enumerate(rows_data) if not all(a != '-' for a in row)]
+            import pdb; pdb.set_trace() # by Loreto
+
             for item in result:
                 gv.logger.info(item)
             gv.logger.info("")
@@ -207,7 +211,7 @@ def testExcel(gVars: dict):
     gv.logger.info(db_flat_data)
     sys.exit(1)
 
-
+'''
 
 
 
@@ -335,25 +339,134 @@ def partnerPerAgente(d_src: dict):
     return d
 
 
+
+
+def myDict(use_benedict: bool=True):
+    if use_benedict:
+        return benedict(keyattr_enabled=True, keyattr_dynamic=False)
+
+    return dict()
+
+###################################################################
+# creazine dei dataFrames per i vari fogli
+###################################################################
+def createStructForExcel():
+    colonne_gerarchia = gv.excel_config.output_sheet.colonne_gerarchia
+    colonne_dati          = gv.excel_config.output_sheet.colonne_dati
+    separator='#'
+
+
+    ### creazion dictionary flatten per una più facile gestione
+    flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator=separator, index=True)
+    for item in flatten_data:
+        gv.logger.debug(item)
+
+
+    ### prendi le colonne fino al TeamManager
+    sheet = myDict()
+
+
+    for inx, sheet_name in enumerate(colonne_gerarchia):
+        sheet[sheet_name] = myDict()
+        sheet[sheet_name]["df"] = myDict()
+
+        rows_data = dictUtils.flatten_keypaths_to_list(list(flatten_data.keys()), item_nrs=inx+1, remove_enpty_array=True)
+        for item in rows_data: gv.logger.debug(item)
+
+        ### --- remove_empty_array items (columns_data)
+        sheet_rows = [row for row in rows_data if not all(a == '-' for a in row)]
+        for item in sheet_rows: gv.logger.debug(item)
+
+        ### --- find row where director changes in modo da inserire una riga di separazione
+        ### --- da fat # @Loreto:  27-04-2025 15:31:45
+        row_separator = [index for index, row in enumerate(sheet_rows) if all(a != '-' for a in row)]
+
+
+        # --- aggiungiamo le colonne contenenti i risultati
+        result_cols = []
+        title_row = colonne_gerarchia[:inx+1]
+        for col_name in colonne_dati:
+            title_row.append(col_name)
+            result_cols.append(0)
+
+        for index in range(len(sheet_rows)):
+            sheet_rows[index].extend(result_cols)
+        # --- aggiungiamo le colonne contenenti i risultati
+
+
+        ### - creiamo il dataFrame
+        sheet[sheet_name]["df"] = pd.DataFrame(
+                # columns = colonne_gerarchia[:inx+1],
+                columns = title_row,
+                data    = sheet_rows
+            )
+
+
+        if False:
+            df = sheet[sheet_name]["df"]
+            lnExcel.addSheets(filename=gv.args.output_agenti_filename, sheets=[sheet_name], dataFrames=[df], sheet_exists="replace", mode='a')
+            lnExcel.setColumnSize(file_path=gv.args.output_agenti_filename, sheetname=sheet_name)
+
+
+
 ################################################################
 # Configurazioe dei reservation addresss (config host)
 ################################################################
 def processExcelFile(gVars: dict):
     excel_filename        = gv.args.input_excel_filename
     agenti_excel_filename = gv.args.output_agenti_filename
-    sheet_name            = gv.excel_config.sheet.name
-    selected_columns      = gv.excel_config.sheet.valid_columns
-    # dict_main_key      = gv.excel_config.sheet.dict_main_key
+    sheet_name            = gv.excel_config.source_sheet.name
+    selected_columns      = gv.excel_config.source_sheet.columns_to_be_extracted
 
+
+    createStructForExcel()
 
 
     ### -------------------------------
-    ### --- get my contracts list
+    ### --- get my contracts data
     ### -------------------------------
+    ### --- lettura sheet contratti da excel
+    gv.workBook  = workBbookClass(excel_filename=excel_filename, logger=gv.logger)
+    sh_contratti = sheetClass(wbClass=gv.workBook, sheet_name_nr=0)
+    dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
+    dictUtils.toYaml(d=dict_contratti, filepath=f"{gv.tmpPath}/stefanoG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=True)
+
+    sys.exit(1)
+
+    db_flat_data = dict_contratti.flatten(separator="#")
+    gv.logger.info(db_flat_data)
+
+
+
+
     contratti_xls = lnExcel_Class(excel_filename=excel_filename, logger=gv.logger)
     d_contratti  = contratti_xls.getSheet(0, usecols=None, convert_to="dict")
     dictUtils.toYaml(d=d_contratti, filepath=f"{gv.tmpPath}/stefanoGG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
     import pdb; pdb.set_trace() # by Loreto
+
+    import pdb; pdb.set_trace() # by Loreto
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
