@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 27-04-2025 17.37.51
+# Date .........: 27-04-2025 17.41.30
 #
 
 
@@ -485,7 +485,7 @@ def Main(gVars: dict):
     ### --- lista agenti
     nomi_agenti = sh_contratti.readColumn(col_name="AGENTE", unique=True)
     gv.logger.info("nomi agenti: %s", nomi_agenti)
-
+    '''
     agent_data = myDict()
     for agent_name in nomi_agenti:
         gv.logger.info("processing agent: %s", agent_name)
@@ -499,6 +499,22 @@ def Main(gVars: dict):
         agent_result = partnerPerAgente(d_src=agent_data[agent_name])
         result_filename = f"{gv.tmpPath}/{agent_name.replace(' ', '_')}_result.yaml"
         dictUtils.toYaml(d=agent_result, title=agent_name, filepath=result_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+
+    '''
+    agent = myDict()
+    for name in nomi_agenti:
+        gv.logger.info("processing agent: %s", name)
+        agent[name] = processAgente(d_src=dict_contratti, nome_agente=name)
+        gv.logger.info("    found records: %s ", len(agent[name].keys()))
+
+        import pdb; pdb.set_trace() # by Loreto
+        ### save yaml to file
+        agent_filename = f"{gv.tmpPath}/{name.replace(' ', '_')}.yaml"
+        dictUtils.toYaml(d=agent[name], title=name, filepath=agent_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+
+        agent_result = partnerPerAgente(d_src=agent[name])
+        result_filename = f"{gv.tmpPath}/{name.replace(' ', '_')}_result.yaml"
+        dictUtils.toYaml(d=agent_result, title=name, filepath=result_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
 
