@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 27-04-2025 17.17.58
+# Date .........: 27-04-2025 18.48.03
 
 
 
@@ -10,7 +10,7 @@
 
 ___templates:
     ___resultStruct: &RESULT_STRUCTURE
-            - Partner
+            # - Partner
             - Totale
             - Confermati
             - In attivazione
@@ -65,6 +65,7 @@ excel:
             - Manager
             - Team Manager
             - Agente
+            - Partner
 
         # saranno presenti in tutti i fogli con i dati sommati all'ultimo livello visualizzato nelle colonne precedenti
         colonne_dati:
