@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 27-04-2025 16.06.51
+# Date .........: 27-04-2025 16.20.35
 #
 
 
@@ -431,51 +431,13 @@ def processExcelFile(gVars: dict):
     dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
     dictUtils.toYaml(d=dict_contratti, filepath=f"{gv.tmpPath}/stefanoG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=True)
 
-    sys.exit(1)
-
-    db_flat_data = dict_contratti.flatten(separator="#")
-    gv.logger.info(db_flat_data)
-
-
-
-
-    contratti_xls = lnExcel_Class(excel_filename=excel_filename, logger=gv.logger)
-    d_contratti  = contratti_xls.getSheet(0, usecols=None, convert_to="dict")
-    dictUtils.toYaml(d=d_contratti, filepath=f"{gv.tmpPath}/stefanoGG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-    import pdb; pdb.set_trace() # by Loreto
-
-    import pdb; pdb.set_trace() # by Loreto
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     ### -------------------------------------
     ### --- estrazione dati per ogni agente
     ### -------------------------------------
     ### --- lista agenti
+    nomi_agenti = sh_contratti.readColumn(col_name="AGENTE")
+    import pdb; pdb.set_trace() # by Loreto
     nomi_agenti = sh_contratti.columnValueList(col_name="AGENTE")
     gv.logger.info("nomi agenti: %s", nomi_agenti)
 
