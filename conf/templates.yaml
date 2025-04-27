@@ -1,0 +1,20 @@
+# main configuration file
+
+# updated by ...: Loreto Notarantonio
+# Date .........: 27-04-2025 17.18.47
+
+
+
+
+# system_variables: !include system_variables.lnk.yaml#system_envars
+
+___templates:
+    ___resultStruct: &RESULT_STRUCTURE
+            - Partner
+            - Totale
+            - Confermati
+            - In attivazione
+            - Back
+            - RID
+            - xxxx
+

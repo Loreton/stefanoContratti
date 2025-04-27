@@ -1,12 +1,25 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 27-04-2025 15.58.30
+# Date .........: 27-04-2025 17.17.58
 
 
 
 
 # system_variables: !include system_variables.lnk.yaml#system_envars
+
+___templates:
+    ___resultStruct: &RESULT_STRUCTURE
+            - Partner
+            - Totale
+            - Confermati
+            - In attivazione
+            - Back
+            - RID
+            - xxxx
+
+
+
 
 main:
 
@@ -17,6 +30,13 @@ StrutturaAziendale_sample:
                 Manager:
                     Team Manager:
                         Agente:
+                            partner:
+                              - totale
+                              - conferma
+                              - in Attivazione
+                              - Back
+
+
 
 
 StrutturaAziendale:
@@ -48,19 +68,15 @@ excel:
 
         # saranno presenti in tutti i fogli con i dati sommati all'ultimo livello visualizzato nelle colonne precedenti
         colonne_dati:
-            - Totale
-            - Confermati
-            - In attivazione
-            - Back
-            - RID
-            - xxxx
+            *RESULT_STRUCTURE
+
 
 
     source_sheet:
         name: Contratti
         columns_to_be_extracted:
             - SPEEDY_CTR_ID
-            - AGENTI
+            - AGENTE
             - PARTNER
             - PRODOTTO
             - ESITO

@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 27-04-2025 15.50.08
+# Date .........: 27-04-2025 16.41.53
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-27_155008"
+    __ln_version__=f"{prj_name} version: V2025-04-27_164153"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
 
 
 
-    processData.processExcelFile(gVars=gv)
+    processData.Main(gVars=gv)
 
     sys.exit()
 

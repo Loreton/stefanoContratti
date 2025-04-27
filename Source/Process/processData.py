@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 27-04-2025 16.20.35
+# Date .........: 27-04-2025 17.37.51
 #
 
 
@@ -37,7 +37,7 @@ def setup(gVars: (dict, SimpleNamespace)):
     gv=gVars
     gv.logger.caller(__name__)
     gv.excelBook=None
-    gv.tmpPath="/tmp/stefanoG"
+    gv.tmpPath="/tmp/stefanoGirini"
     Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
 
 
@@ -243,40 +243,28 @@ def processAgente(d_src: dict, nome_agente: str):
 #
 ################################################################
 def partnerPerAgente(d_src: dict):
-    # d = dict()
-    d = benedict(keyattr_enabled=True, keyattr_dynamic=False)
+    esiti               = gv.excel_config.esito_keywords
+    totale_include      = gv.excel_config.esito_keywords.totale.include
 
     # ----------------------------------------
     # - valori di include/exclude
     # ----------------------------------------
-    esiti               = gv.excel_config.esiti
-    totale_include      = esiti.totale.include
 
-    esiti_exclude       = []
-    for value in esiti.exclude:
-        esiti_exclude.append(value.lower().replace(' ', ''))
-
-    confermato_include = []
-    for value in esiti.confermato.include:
-        confermato_include.append(value.lower().replace(' ', ''))
-
-    attivazione_include = []
-    for value in esiti.attivazione.include:
-        attivazione_include.append(value.lower().replace(' ', ''))
-
-    back_include = []
-    for value in esiti.back.include:
-        back_include.append(value.lower().replace(' ', ''))
+    # --- remove blanks
+    esiti_exclude       = [v.lower().replace(' ', '') for v in esiti.exclude]
+    confermato_include  = [v.lower().replace(' ', '') for v in esiti.confermato.include]
+    attivazione_include = [v.lower().replace(' ', '') for v in esiti.attivazione.include]
+    back_include        = [v.lower().replace(' ', '') for v in esiti.back.include]
 
 
-
+    d = myDict()
     for key, value in d_src.items():
         partner  = value["PARTNER"]
         prodotto = value["PRODOTTO"]
         esito    = value["ESITO"]
 
         if not partner in d:
-            d[partner] = benedict(keyattr_enabled=True, keyattr_dynamic=False)
+            d[partner] = myDict()
             d[partner]["totale"] = 0
             d[partner]["confermato"] = 0
             d[partner]["attivazione"] = 0
@@ -285,7 +273,7 @@ def partnerPerAgente(d_src: dict):
         ptr=d[partner]
 
         ### - exclude unwante esito words
-        gv.logger.info("processing esito: %s", esito)
+        gv.logger.debug("processing esito: %s", esito)
         esito_trimmed = esito.lower().replace(' ', '')
 
         fExcluded = False
@@ -295,7 +283,7 @@ def partnerPerAgente(d_src: dict):
                 break
 
         if fExcluded:
-            gv.logger.warning("excluding due to: %s", excl_value)
+            gv.logger.debug("excluding due to: %s", excl_value)
             continue
 
         if totale_include == "all":
@@ -344,17 +332,30 @@ def partnerPerAgente(d_src: dict):
 def myDict(use_benedict: bool=True):
     if use_benedict:
         return benedict(keyattr_enabled=True, keyattr_dynamic=False)
-
     return dict()
+
 
 ###################################################################
 # creazine dei dataFrames per i vari fogli
+# da tenere sotto controllo i dati degli agenti:
+# Es:
+#   Agent Name:
+#       Eni:
+#           totale: 17
+#           confermato: 16
+#           attivazione: 0
+#           back: 0
+#       Enel:
+#           totale: 17
+#           confermato: 17
+#           attivazione: 0
+#           back: 0
 ###################################################################
-def createStructForExcel():
+def createStructForExcel(agents: dict):
     colonne_gerarchia = gv.excel_config.output_sheet.colonne_gerarchia
     colonne_dati          = gv.excel_config.output_sheet.colonne_dati
     separator='#'
-
+    import pdb; pdb.set_trace() # by Loreto
 
     ### creazion dictionary flatten per una più facile gestione
     flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator=separator, index=True)
@@ -370,16 +371,20 @@ def createStructForExcel():
         sheet[sheet_name] = myDict()
         sheet[sheet_name]["df"] = myDict()
 
+        # --- filter all the columns limiting item per row (item_nrs)
         rows_data = dictUtils.flatten_keypaths_to_list(list(flatten_data.keys()), item_nrs=inx+1, remove_enpty_array=True)
         for item in rows_data: gv.logger.debug(item)
+        ### ---
 
         ### --- remove_empty_array items (columns_data)
         sheet_rows = [row for row in rows_data if not all(a == '-' for a in row)]
         for item in sheet_rows: gv.logger.debug(item)
+        ### ---
 
         ### --- find row where director changes in modo da inserire una riga di separazione
-        ### --- da fat # @Loreto:  27-04-2025 15:31:45
+        ### --- da sviluppare
         row_separator = [index for index, row in enumerate(sheet_rows) if all(a != '-' for a in row)]
+        ### ---
 
 
         # --- aggiungiamo le colonne contenenti i risultati
@@ -391,8 +396,7 @@ def createStructForExcel():
 
         for index in range(len(sheet_rows)):
             sheet_rows[index].extend(result_cols)
-        # --- aggiungiamo le colonne contenenti i risultati
-
+        # ---
 
         ### - creiamo il dataFrame
         sheet[sheet_name]["df"] = pd.DataFrame(
@@ -409,59 +413,96 @@ def createStructForExcel():
 
 
 
+
+
+#########################################################
+#       sample of data
+#            Edison:
+#                totale: 38
+#                confermato: 10
+#                attivazione: 0
+#                back: 1
+#            Edison Business:
+#                totale: 2
+#                confermato: 0
+#                attivazione: 0
+#                back: 0
+#########################################################
+# def shAgentiAddLine(agent_name, data: dict={}, filename: str=None):
+#     global sh_agenti_rows, sh_agenti, excelOutput
+
+#     # Now save the excel
+#     if filename:
+#         excelOutput.save(filename)
+#         return
+
+#     if sh_agenti_rows==0:
+#         sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , COLS.Agente.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , COLS.Partner.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , COLS.Esito_totale.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , COLS.Esito_completato.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , COLS.Esito_attivazione.name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , COLS.Esito_back.name)
+#         sh_agenti_rows += 1
+
+#     for partner, esiti in data.items():
+#         sh_agenti_rows += 1
+#         sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , agent_name)
+#         sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , partner)
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , esiti["totale"])
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , esiti["confermato"])
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , esiti["attivazione"])
+#         sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , esiti["back"])
+
+
+
+
+
 ################################################################
 # Configurazioe dei reservation addresss (config host)
 ################################################################
-def processExcelFile(gVars: dict):
+def Main(gVars: dict):
     excel_filename        = gv.args.input_excel_filename
     agenti_excel_filename = gv.args.output_agenti_filename
     sheet_name            = gv.excel_config.source_sheet.name
     selected_columns      = gv.excel_config.source_sheet.columns_to_be_extracted
 
 
-    createStructForExcel()
-
 
     ### -------------------------------
-    ### --- get my contracts data
+    ### --- read contracts data
     ### -------------------------------
     ### --- lettura sheet contratti da excel
     gv.workBook  = workBbookClass(excel_filename=excel_filename, logger=gv.logger)
     sh_contratti = sheetClass(wbClass=gv.workBook, sheet_name_nr=0)
     dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
-    dictUtils.toYaml(d=dict_contratti, filepath=f"{gv.tmpPath}/stefanoG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=True)
+    dictUtils.toYaml(d=dict_contratti, filepath=f"{gv.tmpPath}/stefanoG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
     ### -------------------------------------
-    ### --- estrazione dati per ogni agente
+    ### --- estrazione dati agenti dal foglio contratti
     ### -------------------------------------
     ### --- lista agenti
-    nomi_agenti = sh_contratti.readColumn(col_name="AGENTE")
-    import pdb; pdb.set_trace() # by Loreto
-    nomi_agenti = sh_contratti.columnValueList(col_name="AGENTE")
+    nomi_agenti = sh_contratti.readColumn(col_name="AGENTE", unique=True)
     gv.logger.info("nomi agenti: %s", nomi_agenti)
 
-    agents = benedict(keyattr_enabled=True, keyattr_dynamic=False)
-    d_excel_out = benedict(keyattr_enabled=True, keyattr_dynamic=False)
-
+    agent_data = myDict()
     for agent_name in nomi_agenti:
         gv.logger.info("processing agent: %s", agent_name)
-        agents[agent_name] = processAgente(d_src=d_contratti, nome_agente=agent_name)
-        gv.logger.info("    found records: %s ", len(agents[agent_name].keys()))
+        agent_data[agent_name] = processAgente(d_src=dict_contratti, nome_agente=agent_name)
+        gv.logger.info("    found records: %s ", len(agent_data[agent_name].keys()))
 
         ### save yaml to file
-        yaml_filename = f"{gv.tmpPath}/{agent_name.replace(' ', '_')}.yaml"
-        dictUtils.toYaml(d=agents[agent_name], title=agent_name, filepath=yaml_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+        agent_filename = f"{gv.tmpPath}/{agent_name.replace(' ', '_')}.yaml"
+        dictUtils.toYaml(d=agent_data[agent_name], title=agent_name, filepath=agent_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
-        agent_result = partnerPerAgente(d_src=agents[agent_name])
-        # agent_result.py()
+        agent_result = partnerPerAgente(d_src=agent_data[agent_name])
+        result_filename = f"{gv.tmpPath}/{agent_name.replace(' ', '_')}_result.yaml"
+        dictUtils.toYaml(d=agent_result, title=agent_name, filepath=result_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
-        # for key, value in agent_result.items():
-        #     shAgentiAddLine(agent_name=agent_name, partner=key, data=value)
-        # import pdb; pdb.set_trace() # by Loreto
-        shAgentiAddLine(agent_name=agent_name, data=agent_result)
 
-    # shAgentiAddLine(agent_name=agent_name, filename="/tmp/prova01.xls")
-    shAgentiAddLine(agent_name=agent_name, filename=agenti_excel_filename)
+    # --- prepare Excel structure
+    import pdb; pdb.set_trace() # by Loreto
+    createStructForExcel(agents=agent_result)
 
