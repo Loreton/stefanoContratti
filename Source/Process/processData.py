@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 27-04-2025 19.01.17
+# Date .........: 28-04-2025 10.47.59
 #
 
 
@@ -336,18 +336,49 @@ def myDict(use_benedict: bool=True):
 
 
 
-def insertPartnerForAgent():
-    if sheet_name == "Partnerxx":
-        wk_rows = rows_data[:]
-        for i, row in enumerate(wk_rows):
-            agent_name = row[-2].replace('_', ' ')
-            # print(agent_name, agent_name in agents.keys())
-            if agent_name in agents.keys():
-                for partner_name in agents[agent_name]["results"].keys():
-                    new_row=['-', '-', '-', '-', '-', '-', partner_name]
-                    rows_data.insert(i, new_row)
 
-                # import pdb; pdb.set_trace() # by Loreto
+
+###########################################################################
+#
+###########################################################################
+def insertAgentInStruct(main_dict: dict, agents: dict):
+    print(agents.keys())
+    separator = '.'
+    key_paths = main_dict.keypaths(gv.struttura_aziendale)
+
+    fLoreto = True
+    fBenedict = not fLoreto
+
+    if fLoreto:
+        flatten_data = dictUtils.lnFlatten(main_dict, separator=separator, index=False)
+        agent_col=5
+        for item in flatten_data:
+            keypath = item.split(separator)
+            if len(keypath) >= agent_col:  ### colonna Agent
+                agent_name = keypath[-1]
+                if agent_name in agents.keys():
+                    gv.logger.info("adding %s results data", agent_name)
+                    this_agent = agents.pop(agent_name)
+                    # print(agents.keys())
+                    agent_results=this_agent["results"]
+                    if isinstance(agent_results, dict):
+                        main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
+
+
+    if fBenedict: # --- uso il jkypaths di benedict....
+        agent_col=6
+        for item in key_paths:
+            keypath = item.split(separator)
+            if len(keypath) >= agent_col:  ### colonna Agent
+                agent_name = keypath[-1]
+                if agent_name in agents.keys():
+                    this_agent= agents.pop(agent_name)
+                    gv.logger.info("adding %s results data", agent_name)
+                    agent_results=this_agent["results"]
+                    if isinstance(agent_results, dict):
+                        main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
+
+    dictUtils.toYaml(d=main_dict, filepath=f"{gv.tmpPath}/strutturaAziendaleWithAgentResuls.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
 
@@ -373,17 +404,21 @@ def createStructForExcel(agents: dict):
     colonne_dati      = gv.excel_config.output_sheet.colonne_dati
     separator='#'
 
-    print(agents.keys())
-    ### creazion dictionary flatten per una più facile gestione
+    ### --- aggiungiamo i dati dei risultati per gli agenti trovai
+    insertAgentInStruct(gv.struttura_aziendale, agents)
+    if len(agents):
+        gv.logger.warning("Alcuni agenti non sono presenti nella struttura ma sono presenti nel risultati dei contratti")
+        for name in agents.keys():
+            gv.logger.warning(" - %s", name)
+
+
     flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator=separator, index=True)
-    for item in flatten_data:
-        gv.logger.debug(item)
+    for item in flatten_data: gv.logger.debug(item)
 
 
-    ### prendi le colonne fino al TeamManager
+
+    # --- @Loreto:  creaimao le strutture per i fogli excel
     sheet = myDict()
-
-
     for inx, sheet_name in enumerate(colonne_gerarchia):
         sheet[sheet_name] = myDict()
         sheet[sheet_name]["df"] = myDict()
@@ -392,19 +427,6 @@ def createStructForExcel(agents: dict):
         rows_data = dictUtils.flatten_keypaths_to_list(list(flatten_data.keys()), item_nrs=inx+1, remove_enpty_array=True)
         for item in rows_data: gv.logger.debug(item)
         ### ---
-
-        if sheet_name == "Partnerxx":
-            insertPartnerForAgent()
-            wk_rows = rows_data[:]
-            for i, row in enumerate(wk_rows):
-                agent_name = row[-2].replace('_', ' ')
-                # print(agent_name, agent_name in agents.keys())
-                if agent_name in agents.keys():
-                    for partner_name in agents[agent_name]["results"].keys():
-                        new_row=['-', '-', '-', '-', '-', '-', partner_name]
-                        rows_data.insert(i, new_row)
-
-                    # import pdb; pdb.set_trace() # by Loreto
 
 
         ### --- remove_empty_array items (columns_data)
@@ -442,50 +464,37 @@ def createStructForExcel(agents: dict):
             lnExcel.addSheet(filename=gv.args.output_agenti_filename, sheets=[sheet_name], dataFrames=[df], sheet_exists="replace", mode='a')
             lnExcel.setColumnSize(file_path=gv.args.output_agenti_filename, sheetname=sheet_name)
 
+    import pdb; pdb.set_trace() # by Loreto
 
 
 
+### -------------------------------------
+### --- processiamo i contratti per ogni agente
+### -------------------------------------
+def agentContracts(contract_dict: dict, list_agenti: list):
+    fDEBUG_SAVE_TO_YAML = False
+    d = myDict()
+    for name in list_agenti:
+        gv.logger.info("processing agent: %s", name)
+        d[name] = myDict()
 
-#########################################################
-#       sample of data
-#            Edison:
-#                totale: 38
-#                confermato: 10
-#                attivazione: 0
-#                back: 1
-#            Edison Business:
-#                totale: 2
-#                confermato: 0
-#                attivazione: 0
-#                back: 0
-#########################################################
-# def shAgentiAddLine(agent_name, data: dict={}, filename: str=None):
-#     global sh_agenti_rows, sh_agenti, excelOutput
-
-#     # Now save the excel
-#     if filename:
-#         excelOutput.save(filename)
-#         return
-
-#     if sh_agenti_rows==0:
-#         sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , COLS.Agente.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , COLS.Partner.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , COLS.Esito_totale.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , COLS.Esito_completato.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , COLS.Esito_attivazione.name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , COLS.Esito_back.name)
-#         sh_agenti_rows += 1
-
-#     for partner, esiti in data.items():
-#         sh_agenti_rows += 1
-#         sh_agenti.write(sh_agenti_rows , COLS.Agente.value            , agent_name)
-#         sh_agenti.write(sh_agenti_rows , COLS.Partner.value           , partner)
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_totale.value      , esiti["totale"])
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_completato.value  , esiti["confermato"])
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_attivazione.value , esiti["attivazione"])
-#         sh_agenti.write(sh_agenti_rows , COLS.Esito_back.value        , esiti["back"])
+        ### -----------------------------
+        d[name]["data"] = retrieveAgentData(d_src=contract_dict, nome_agente=name)
+        gv.logger.info("    found records: %s ", len(d[name]["data"].keys()))
+        if fDEBUG_SAVE_TO_YAML:
+            agent_filename = f"{gv.tmpPath}/{name.replace(' ', '_')}_data.yaml"
+            dictUtils.toYaml(d=d[name]["data"], title=name, filepath=agent_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
+        ### -----------------------------
+        d[name]["results"] = partnerPerAgente(d_src=d[name]["data"])
+        ag_results=d[name]["results"]
+        gv.logger.info("    found partners: %s ", len(ag_results.keys()))
+        if fDEBUG_SAVE_TO_YAML:
+            result_filename = f"{gv.tmpPath}/{name.replace(' ', '_')}_results.yaml"
+            dictUtils.toYaml(d=ag_results, title=name, filepath=result_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+
+    return d
 
 
 
@@ -493,7 +502,6 @@ def createStructForExcel(agents: dict):
 # Configurazioe dei reservation addresss (config host)
 ################################################################
 def Main(gVars: dict):
-    fDEBUG_SAVE_TO_YAML = False
     excel_filename        = gv.args.input_excel_filename
     agenti_excel_filename = gv.args.output_agenti_filename
     sheet_name            = gv.excel_config.source_sheet.name
@@ -511,6 +519,9 @@ def Main(gVars: dict):
     dictUtils.toYaml(d=dict_contratti, filepath=f"{gv.tmpPath}/stefanoG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
+
+
+
     ### -------------------------------------
     ### --- estrazione dati agenti dal foglio contratti
     ### -------------------------------------
@@ -521,6 +532,8 @@ def Main(gVars: dict):
     ### -------------------------------------
     ### --- processiamo i contratti per ogni agente
     ### -------------------------------------
+    agent = agentContracts(contract_dict=dict_contratti, list_agenti=nomi_agenti )
+    '''
     agent = myDict()
     for name in nomi_agenti:
         gv.logger.info("processing agent: %s", name)
@@ -541,6 +554,7 @@ def Main(gVars: dict):
         if fDEBUG_SAVE_TO_YAML:
             result_filename = f"{gv.tmpPath}/{name.replace(' ', '_')}_results.yaml"
             dictUtils.toYaml(d=ag_results, title=name, filepath=result_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+    '''
 
 
 

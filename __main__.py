@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 27-04-2025 16.41.53
+# Date .........: 28-04-2025 07.44.18
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -48,14 +48,14 @@ def readConfig():
     global gv
     config_file=f"{prj_name}_config.yaml"
 
-    unresolved_fileout=f"{gv.tmp_dir}/unresolved_full_config.yaml"
+    unresolved_fileout=f"{gv.tmp_dir}/full_config.yaml"
     if not (full_config:=FileLoader.loadConfigurationData(config_file=config_file, save_yaml_on_file=unresolved_fileout) ):
         logger.error("Configuration data error")
+        sys.exit(1)
 
     gv.excel_config         = full_config.pop("excel") ### extrai la parte sqlite
     gv.struttura_aziendale  = full_config.pop("StrutturaAziendale") ### extrai la parte sqlite
     # gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
-
 
 
 #######################################################
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-27_164153"
+    __ln_version__=f"{prj_name} version: V2025-04-28_074418"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 

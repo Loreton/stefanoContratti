@@ -23,7 +23,7 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [
-                "--input-excel-filename=data/export_contratti.xls",
+                "--input-excel-filename=data/export_contratti_testcopy.xlsx",
                 "--output-agenti-filename=/tmp/contratti_agenti.xls",
                 "--nolnlibzip"
             ]
