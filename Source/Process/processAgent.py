@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 20.32.11
+# Date .........: 28-04-2025 20.36.48
 #
 
 
@@ -214,7 +214,7 @@ def insertAgentInStruct(main_dict: dict, agents: dict):
 # ritorna list of list
 # nella prima riga mettiamo i totali_agente dei vari partner
 #########################################################
-def calculateAgentResults(agent_data: dict, row: list) -> list:
+def calculateResults(agent_data: dict, row: list) -> list:
     new_rows = []
     sunto_agente = row[:]
     totali = 0
@@ -256,7 +256,7 @@ def calculateAgentResults(agent_data: dict, row: list) -> list:
 ###         partner2:
 ###             ...:
 ### ##########################################################
-def agentContracts(contract_dict: dict, lista_agenti: list):
+def retrieveContracts(contract_dict: dict, lista_agenti: list):
     fDEBUG_SAVE_TO_YAML = False
     d = gv.myDict()
     for name in lista_agenti:
