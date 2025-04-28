@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 10.54.02
+# Date .........: 28-04-2025 10.47.59
 #
 
 
@@ -468,22 +468,13 @@ def createStructForExcel(agents: dict):
 
 
 
-### ##########################################################
+### -------------------------------------
 ### --- processiamo i contratti per ogni agente
-### crea una struct:
-###     agent_name:
-###         partner1:
-###             totale: 38
-###             confermato: 10
-###             attivazione: 0
-###             back: 1
-###         partner2:
-###             ...:
-### ##########################################################
-def agentContracts(contract_dict: dict, lista_agenti: list):
+### -------------------------------------
+def agentContracts(contract_dict: dict, list_agenti: list):
     fDEBUG_SAVE_TO_YAML = False
     d = myDict()
-    for name in lista_agenti:
+    for name in list_agenti:
         gv.logger.info("processing agent: %s", name)
         d[name] = myDict()
 
@@ -529,6 +520,8 @@ def Main(gVars: dict):
 
 
 
+
+
     ### -------------------------------------
     ### --- estrazione dati agenti dal foglio contratti
     ### -------------------------------------
@@ -539,25 +532,32 @@ def Main(gVars: dict):
     ### -------------------------------------
     ### --- processiamo i contratti per ogni agente
     ### -------------------------------------
-    agent_data = agentContracts(contract_dict=dict_contratti, lista_agenti=nomi_agenti )
+    agent = agentContracts(contract_dict=dict_contratti, list_agenti=nomi_agenti )
+    '''
+    agent = myDict()
+    for name in nomi_agenti:
+        gv.logger.info("processing agent: %s", name)
+        agent[name] = myDict()
+
+        ### -----------------------------
+        agent[name]["data"] = retrieveAgentData(d_src=dict_contratti, nome_agente=name)
+        gv.logger.info("    found records: %s ", len(agent[name]["data"].keys()))
+        if fDEBUG_SAVE_TO_YAML:
+            agent_filename = f"{gv.tmpPath}/{name.replace(' ', '_')}_data.yaml"
+            dictUtils.toYaml(d=agent[name]["data"], title=name, filepath=agent_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
-    ### -------------------------------------
-    ### --- inseriamo gli agenti nella struttura globale
-    ### -------------------------------------
-    insertAgentInStruct(main_dict=gv.struttura_aziendale, agents=agent_data)
-    if len(agents):
-        gv.logger.warning("Alcuni agenti non sono presenti nella struttura ma sono presenti nel risultati dei contratti")
-        for name in agents.keys():
-            gv.logger.warning(" - %s", name)
-
-
-    flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator=separator, index=True)
-    for item in flatten_data: gv.logger.debug(item)
-
+        ### -----------------------------
+        agent[name]["results"] = partnerPerAgente(d_src=agent[name]["data"])
+        ag_results=agent[name]["results"]
+        gv.logger.info("    found partners: %s ", len(ag_results.keys()))
+        if fDEBUG_SAVE_TO_YAML:
+            result_filename = f"{gv.tmpPath}/{name.replace(' ', '_')}_results.yaml"
+            dictUtils.toYaml(d=ag_results, title=name, filepath=result_filename, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+    '''
 
 
 
     # --- prepare Excel structure
-    # createStructForExcel(agents=agent)
+    createStructForExcel(agents=agent)
 
