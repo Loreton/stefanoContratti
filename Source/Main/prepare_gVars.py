@@ -2,7 +2,7 @@
 
 #===============================================
 # updated by ...: Loreto Notarantonio
-# Date .........: 25-04-2025 16.37.55
+# Date .........: 28-04-2025 20.31.21
 #===============================================
 
 import sys; sys.dont_write_bytecode=True
@@ -14,6 +14,10 @@ import socket
 from pathlib import Path
 from benedict import benedict
 
+def myDict(use_benedict: bool=True):
+    if use_benedict:
+        return benedict(keyattr_enabled=True, keyattr_dynamic=False)
+    return dict()
 
 def setMainVars(logger, prj_name, input_args, type: str=None, search_paths: list=["conf"]):
     global gv
@@ -44,6 +48,7 @@ def setMainVars(logger, prj_name, input_args, type: str=None, search_paths: list
     gv.run_env              =  "prod" if gv.args.go else "dry_run"
     gv.fExecute             =  gv.args.go
 
+    gv.myDict               = myDict
 
     # - set env variables
     os.environ['DATE_TIME'] = gv.date_time

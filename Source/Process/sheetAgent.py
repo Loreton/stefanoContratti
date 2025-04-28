@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 20.32.35
+# Date .........: 28-04-2025 20.27.20
 #
 
 
@@ -13,29 +13,16 @@ from types import SimpleNamespace
 from enum import Enum
 import pandas as pd
 
-
-# --- @Loreto: my lib
 import ln_pandasExcel_Class as lnExcel
+
+
 import lnUtils
 import dictUtils
 from ln_pandasExcel_Class import workBbookClass, sheetClass
-import processAgentData as AGENT
-import sheetAgent
+# import xlwt
 
-
-class COLS(Enum):
-    Direttore         = 1
-    AreaManager       = 2
-    ManagerPlus       = 3
-    Manager           = 4
-    TeamManager       = 5
-    Agente            = 6
-    Partner           = 7
-    Esito_totale      = 8
-    Esito_completato  = 9
-    Esito_attivazione = 10
-    Esito_back        = 11
-
+sq="'"
+dq='"'
 
 def setup(gVars: (dict, SimpleNamespace)):
     global gv
@@ -45,8 +32,7 @@ def setup(gVars: (dict, SimpleNamespace)):
     gv.tmpPath="/tmp/stefanoGirini"
     Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
 
-    # sheetAgent.sheetAgent.setup(gVars=gv)
-    AGENT.setup(gVars=gv)
+
 
 
 
@@ -69,7 +55,7 @@ def sheetAgent(d: dict):
     keypaths = dictUtils.chunckList(flatten_keys, item_nrs=sh_index, separator=separator)
     records = lnUtils.removeListOfListDuplicates(list_of_lists=keypaths, keep_order=True)
 
-    df = gv.myDict()
+    df = myDict()
 
     ### --- remove_empty_array items (columns_data)
     # sheet_rows = [row for row in rows_data if not all(a == '-' for a in row)]
@@ -130,65 +116,4 @@ def sheetAgent(d: dict):
     import pdb; pdb.set_trace() # by Loreto
     ...
 
-
-
-
-
-
-
-################################################################
-# Configurazioe dei reservation addresss (config host)
-################################################################
-def Main(gVars: dict):
-    excel_filename        = gv.args.input_excel_filename
-    agenti_excel_filename = gv.args.output_agenti_filename
-    sheet_name            = gv.excel_config.source_sheet.name
-    selected_columns      = gv.excel_config.source_sheet.columns_to_be_extracted
-
-
-
-    ### -------------------------------
-    ### --- read contracts data
-    ### -------------------------------
-    gv.workBook  = workBbookClass(excel_filename=excel_filename, logger=gv.logger)
-    sh_contratti = sheetClass(wbClass=gv.workBook, sheet_name_nr=0)
-    dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
-    dictUtils.toYaml(d=dict_contratti, filepath=f"{gv.tmpPath}/stefanoG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-
-
-
-    ### -------------------------------------
-    ### --- estrazione dati agenti dal foglio contratti
-    ### -------------------------------------
-    nomi_agenti = sh_contratti.readColumn(col_name="AGENTE", unique=True)
-    gv.logger.info("nomi agenti: %s", nomi_agenti)
-
-
-    ### -------------------------------------
-    ### --- processiamo i contratti per ogni agente
-    ### -------------------------------------
-    agents = AGENT.agentContracts(contract_dict=dict_contratti, lista_agenti=nomi_agenti )
-
-
-    ### -------------------------------------
-    ### --- inseriamo gli agenti nella struttura globale
-    ### --- gli agenti inseriti verranno rimossi dagli agenti trovati
-    ### --- in modo che se avanzano segnaliamo l'incongruenza
-    ### -------------------------------------
-    AGENT.insertAgentInStruct(main_dict=gv.struttura_aziendale, agents=agents)
-    if len(agents):
-        gv.logger.warning("I seguenti agenti sono presenti nel foglio contratti, na non nella struttura")
-        for name in agents.keys():
-            gv.logger.warning(" - %s", name)
-
-
-    flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator='#', index=True)
-    for item in flatten_data: gv.logger.debug(item)
-
-
-    sheetAgent(d=gv.struttura_aziendale)
-
-
-    # --- prepare Excel structure
-    # createStructForExcel(agents=agent)
 
