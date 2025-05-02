@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 02-05-2025 17.22.14
+# Date .........: 02-05-2025 18.26.34
 #
 
 
@@ -12,6 +12,11 @@ from benedict import benedict
 from types import SimpleNamespace
 from enum import Enum
 import pandas as pd
+
+import  openpyxl
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
+
 
 import ln_pandasExcel_Class as lnExcel
 
@@ -31,7 +36,42 @@ def setup(gVars: (dict, SimpleNamespace)):
     gv.excelBook=None
 
 
+def setColumnSize(ws):
+    # Auto-adjust column widths
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter  # Get the column name (e.g., 'A')
+        for cell in col:
+            try:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
 
+
+
+def setTitle(ws):
+    gray = 'b2b2b2'
+    # formatting the header columns, filling red color
+    for col in range(1, ws.max_column + 1):
+       cell_header = ws.cell(1, col)
+       cell_header.fill = PatternFill(start_color=gray, end_color=gray, fill_type="solid") #used hex code for red color
+
+
+############################################################
+# cell_range = [ (row1, col1), (row2, col2), ...]
+############################################################
+def setTMagagerColor(ws, cells: list):
+    light_yellow_3 = 'ffffa6'
+
+    my_color = light_yellow_3
+    # for cell in cells: #- prendo direttamente il tuple
+    #     ws.cell.fill = PatternFill(start_color=my_color, end_color=my_color, fill_type="solid") #used hex code for red color
+    for row, col in cells:
+        curr_cell = ws.cell(row, col)
+        curr_cell.fill = PatternFill(start_color=my_color, end_color=my_color, fill_type="solid") #used hex code for red color
 
 
 
@@ -58,7 +98,7 @@ def createSheet(d: dict, calculateAgentResultsCB):
 
 
     # --- aggiungiamo le colonne contenenti i risultati di default (=0)
-    default_result_cols = ["somma_tm"]
+    default_result_cols = [""]
     # --- @Loreto: prepariamo il titolo
     title_row = colonne_gerarchia[:sh_index]
     inx=0
@@ -80,7 +120,7 @@ def createSheet(d: dict, calculateAgentResultsCB):
     # --- con questi dati andrò a creare delle righe sotto il Team Manager
     # -------------------------------------------------------------------------------------
     sheet_rows = [] # righe del foglio excel
-
+    row_to_be_colored =[]
     for index in range(len(records)):
         tm_somma=default_result_cols[1:] ### conterrà la somma dei vari partner
         partner_col_data = gv.myDict()
@@ -117,9 +157,10 @@ def createSheet(d: dict, calculateAgentResultsCB):
 
         new_row = curr_rec[:]
         ### --- riga con i totali per teamManager
-        new_row.append('somma tm2')
+        new_row.append('somma')
         new_row.extend(tm_somma)
         sheet_rows.append(new_row)
+        row_to_be_colored.append(len(sheet_rows)+1) ### aggiungere il titolo
 
         if partner_col_data:
             for partner, data in partner_col_data.items():
@@ -130,9 +171,6 @@ def createSheet(d: dict, calculateAgentResultsCB):
                 sheet_rows.append(new_row)
         else:
             gv.logger.warning("    NO agent data found")
-            new_row=row[:]
-            new_row.extend(default_result_cols)
-            sheet_rows.append(new_row)
 
 
     # --- @Loreto:  eliminiamo le celle che hanno valore == cella superire
@@ -148,8 +186,28 @@ def createSheet(d: dict, calculateAgentResultsCB):
 
 
     lnExcel.addSheet(filename=gv.args.output_agenti_filename, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
-    lnExcel.setColumnSize(file_path=gv.args.output_agenti_filename, sheetname=sh_name)
+    # lnExcel.setColumnSize(file_path=gv.args.output_agenti_filename, sheetname=sh_name)
+    # lnExcel.setTitle(file_path=gv.args.output_agenti_filename, sheetname=sh_name)
+    # print(row_to_be_colored)
+
+    ### --- creaim il range del TManager e relativi risultati
+    cell_range=[]
+    for col in range(5, len(title_row)+1):
+        row_cells = [(row, col) for row in row_to_be_colored]
+        cell_range.extend(row_cells)
+
+    file_path = gv.args.output_agenti_filename
+    wb = openpyxl.load_workbook(file_path)
+    ws = wb[sh_name]
+    setColumnSize(ws)
+    setTitle(ws)
+    setTMagagerColor(ws, cells=cell_range)
+    # c = ws['B2']
+    ws.freeze_panes = ws['B2'] ## Freeze everything to left of B (that is A) and no columns to feeze
+    wb.save(file_path)
 
 
 
-
+    # cell_ids = ['B2', 'B3', 'B4', 'B5', 'A2']
+    # for i in range(5):
+    #     ws[cell_ids[i]].fill = fillers[i]
