@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 02-05-2025 16.08.07
+# Date .........: 02-05-2025 17.22.14
 #
 
 
@@ -58,7 +58,7 @@ def createSheet(d: dict, calculateAgentResultsCB):
 
 
     # --- aggiungiamo le colonne contenenti i risultati di default (=0)
-    default_result_cols = [""]
+    default_result_cols = ["somma_tm"]
     # --- @Loreto: prepariamo il titolo
     title_row = colonne_gerarchia[:sh_index]
     inx=0
@@ -79,14 +79,14 @@ def createSheet(d: dict, calculateAgentResultsCB):
     # ---   }
     # --- con questi dati andrò a creare delle righe sotto il Team Manager
     # -------------------------------------------------------------------------------------
-    sheet_rows = []
+    sheet_rows = [] # righe del foglio excel
 
     for index in range(len(records)):
         tm_somma=default_result_cols[1:] ### conterrà la somma dei vari partner
         partner_col_data = gv.myDict()
-        row=records[index]
-        gv.logger.info("analysing data for teamManager %s:", row[-1])
-        agent_list = d[row] ### - lista degli agenti sotto questo teamManager
+        curr_rec=records[index] ## riga corrente
+        gv.logger.info("analysing data for teamManager %s:", curr_rec[-1])
+        agent_list = d[curr_rec] ### - lista degli agenti sotto questo teamManager
 
         for agent_name in agent_list:
             gv.logger.info("    agent: %s", agent_name)
@@ -115,16 +115,16 @@ def createSheet(d: dict, calculateAgentResultsCB):
             ### --- fine agent
 
 
+        new_row = curr_rec[:]
         ### --- riga con i totali per teamManager
-        new_row = row[:]
-        new_row.append('')
+        new_row.append('somma tm2')
         new_row.extend(tm_somma)
         sheet_rows.append(new_row)
 
         if partner_col_data:
             for partner, data in partner_col_data.items():
                 gv.logger.notify("    agent data has been found")
-                new_row = row[:]
+                new_row = curr_rec[:]
                 new_row.append(partner)
                 new_row.extend(data)
                 sheet_rows.append(new_row)
