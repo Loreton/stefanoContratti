@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 20.41.58
+# Date .........: 02-05-2025 09.21.55
 #
 
 
@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from benedict import benedict
 from types import SimpleNamespace
-from enum import Enum
+
 import pandas as pd
 
 
@@ -21,20 +21,8 @@ import dictUtils
 from ln_pandasExcel_Class import workBbookClass, sheetClass
 import processAgent
 import sheetAgent
+import sheetTeamManager
 
-
-class COLS(Enum):
-    Direttore         = 1
-    AreaManager       = 2
-    ManagerPlus       = 3
-    Manager           = 4
-    TeamManager       = 5
-    Agente            = 6
-    Partner           = 7
-    Esito_totale      = 8
-    Esito_completato  = 9
-    Esito_attivazione = 10
-    Esito_back        = 11
 
 
 def setup(gVars: (dict, SimpleNamespace)):
@@ -51,79 +39,45 @@ def setup(gVars: (dict, SimpleNamespace)):
 
 
 
-#################################################################
-#
-#################################################################
-def sheetAgent(d: dict):
-    colonne_gerarchia = gv.excel_config.output_sheet.colonne_gerarchia
-    colonne_dati      = gv.excel_config.output_sheet.colonne_dati
-
-    sh_index          = COLS.Agente.value
-    sh_name           = COLS.Agente.name
-    separator         = '#'
-    flatten_data      = dictUtils.lnFlatten(gv.struttura_aziendale, separator = separator, index = True)
-    flatten_keys      = list(flatten_data.keys())
-
-    ## catturiamo tutti i records fino al livello di agent creando dei keypath
-    keypaths = dictUtils.chunckList(flatten_keys, item_nrs=sh_index, separator=separator)
-
-    ### --- remove_empty_array items (columns_data)
-    records = lnUtils.removeListOfListDuplicates(list_of_lists=keypaths, keep_order=True)
 
 
 
-    ### --- find row where director changes in modo da inserire una riga di separazione
-    ### --- da sviluppare
-    # row_separator = [index for index, row in enumerate(sheet_rows) if all(a != '-' for a in row)]
-    ### ---
 
 
-    # --- @Loreto: prepariamo il titolo
-    default_result_cols = [""]
-    title_row = colonne_gerarchia[:sh_index]
-    inx=0
-    for col_name in colonne_dati:
-        title_row.append(col_name)
-        if inx > 0:
-            default_result_cols.append(0) ### - Valore di default
-        inx+=1
+#########################################################
+# per ogni partner crea un riga
+# ritorna list of list
+# nella prima riga mettiamo i totali_agente dei vari partner
+#########################################################
+def calculateAgentResults(agent_data: dict, row: list) -> list:
+    new_rows = []
+    sunto_agente = row[:]
+    totali = 0
+    confermati = 0
+    attivazione = 0
+    back = 0
+    rid = 0
+    for partner_name in agent_data:
+        new_row=row[:]
+        ptr=agent_data[partner_name]
+        data_cols=[partner_name,
+                    ptr["totale"],
+                    ptr["confermato"],
+                    ptr["attivazione"],
+                    ptr["back"],
+                    ptr["rid"],
+                ]
+        totali      += ptr["totale"]
+        confermati  += ptr["confermato"]
+        attivazione += ptr["attivazione"]
+        back        += ptr["back"]
+        rid         += ptr["rid"]
 
-
-
-    # --- @Loreto: riempiamo le colonne dati con il valori agente
-    sheet_rows = []
-    for index in range(len(records)):
-        row=records[index]
-        agent_data = d[row]
-        if agent_data:
-            new_row=processAgent.calculateResults(agent_data=agent_data, row=row)
-            # print(new_row)
-            sheet_rows.extend(new_row)
-        else:
-            new_row=row[:]
-            new_row.extend(default_result_cols)
-            sheet_rows.append(new_row)
-    # ---
-
-    # --- @Loreto:  eliminiamo le celle che hanno valore == cella superire
-    rows_data = dictUtils.compact_list(data=sheet_rows, max_items=sh_index, replace_str='-')
-    # for i, item in enumerate(rows_data): gv.logger.info("%s . %s", i, item)
-
-    ### - creiamo il dataFrame
-    df = pd.DataFrame(
-            # columns = colonne_gerarchia[:inx+1],
-            columns = title_row,
-            data    = rows_data
-        )
-
-
-    lnExcel.addSheet(filename=gv.args.output_agenti_filename, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
-    lnExcel.setColumnSize(file_path=gv.args.output_agenti_filename, sheetname=sh_name)
-
-
-    import pdb; pdb.set_trace() # by Loreto
-    ...
-
+        new_row.extend(data_cols)
+        new_rows.append(new_row)
+    sunto_agente.extend(["", totali, confermati, attivazione, back, rid])
+    new_rows.insert(0, sunto_agente)
+    return new_rows
 
 
 
@@ -134,12 +88,14 @@ def sheetAgent(d: dict):
 # Configurazioe dei reservation addresss (config host)
 ################################################################
 def Main(gVars: dict):
-    excel_filename        = gv.args.input_excel_filename
-    agenti_excel_filename = gv.args.output_agenti_filename
-    sheet_name            = gv.excel_config.source_sheet.name
-    selected_columns      = gv.excel_config.source_sheet.columns_to_be_extracted
-
-
+    excel_filename             = gv.args.input_excel_filename
+    agenti_excel_filename      = gv.args.output_agenti_filename
+    sheet_name                 = gv.excel_config.source_sheet.name
+    selected_columns           = gv.excel_config.source_sheet.columns_to_be_extracted
+    file_agents_data           = gv.working_files.file_agents_data
+    file_agents_results        = gv.working_files.file_agents_results
+    file_contratti_preprocess  = gv.working_files.file_contratti_preprocess
+    file_agenti_discrepanti   = gv.working_files.file_agenti_discrepanti
 
     ### -------------------------------
     ### --- read contracts data
@@ -147,8 +103,7 @@ def Main(gVars: dict):
     gv.workBook  = workBbookClass(excel_filename=excel_filename, logger=gv.logger)
     sh_contratti = sheetClass(wbClass=gv.workBook, sheet_name_nr=0)
     dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
-    dictUtils.toYaml(d=dict_contratti, filepath=f"{gv.tmpPath}/stefanoG.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-
+    dictUtils.toYaml(d=dict_contratti, filepath=file_contratti_preprocess, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
     ### -------------------------------------
@@ -163,6 +118,19 @@ def Main(gVars: dict):
     ### -------------------------------------
     agents = processAgent.retrieveContracts(contract_dict=dict_contratti, lista_agenti=nomi_agenti )
 
+    ### -------------------------------------
+    ### --- creazione due dict (che salviamo su yaml file)
+    ### --- per eventuale verifica di un corretto calcolo
+    ### --- gv.agents_results sarà utile per il calcolo ai livelli superiori.
+    ### -------------------------------------
+    d_data = gv.myDict()
+    gv.agent_results = gv.myDict()
+    for name in agents:
+        d_data[name]=agents[name]["data"]
+        gv.agent_results[name]=agents[name]["results"]
+
+    dictUtils.toYaml(d=d_data, filepath=file_agents_data, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+    dictUtils.toYaml(d=gv.agent_results, filepath=file_agents_results, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
     ### -------------------------------------
     ### --- inseriamo gli agenti nella struttura globale
@@ -174,15 +142,18 @@ def Main(gVars: dict):
         gv.logger.warning("I seguenti agenti sono presenti nel foglio contratti, na non nella struttura")
         for name in agents.keys():
             gv.logger.warning(" - %s", name)
+        dictUtils.toYaml(d=agents, filepath=file_agenti_discrepanti, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
-    flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator='#', index=True)
-    for item in flatten_data: gv.logger.debug(item)
+    ### -------------------------------------
+    ### --- creiamo il flatten del mainDict
+    ### -------------------------------------
+    gv.flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator='#', index=True)
+    gv.flatten_keys = list(gv.flatten_data.keys())
+    for item in gv.flatten_data: gv.logger.debug(item)
 
 
-    sheetAgent(d=gv.struttura_aziendale)
+    # sheetAgent.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
+    sheetTeamManager.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
 
-
-    # --- prepare Excel structure
-    # createStructForExcel(agents=agent)
 

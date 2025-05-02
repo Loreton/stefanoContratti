@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 20.36.48
+# Date .........: 02-05-2025 09.03.14
 #
 
 
@@ -49,6 +49,22 @@ def setup(gVars: (dict, SimpleNamespace)):
 
 
 
+def somma_livello(d, livello_attuale=1, livello_target=6):
+    if livello_attuale == livello_target:
+        # Se siamo al livello target, sommiamo i valori (che devono essere numeri)
+        return sum(v for v in d.values() if isinstance(v, (int, float)))
+
+    # Se non siamo ancora al livello target, ricorriamo nei sotto-dizionari
+    somma = 0
+    for k, v in d.items():
+        if isinstance(v, dict):
+            risultato = somma_livello(d=v, livello_attuale=livello_attuale+1, livello_target=livello_target)
+            somma += risultato
+            # Memorizziamo la somma nel dizionario corrente, se serve
+            d[k]['_somma'] = risultato
+    return somma
+
+
 
 
 ################################################################
@@ -90,9 +106,7 @@ def partnerPerAgente(d_src: dict):
         return fConfirmed
 
 
-    def excludeEsito(word: str, exclude_list: list):
-        # esito_trimmed = esito.lower().replace(' ', '')
-
+    def excludeData(word: str, exclude_list: list):
         fExcluded = False
         for excl_value in exclude_list:
             if excl_value in word:
@@ -116,13 +130,14 @@ def partnerPerAgente(d_src: dict):
     confermato_include  = [v.lower().replace(' ', '') for v in esiti.confermato.include]
     attivazione_include = [v.lower().replace(' ', '') for v in esiti.attivazione.include]
     back_include        = [v.lower().replace(' ', '') for v in esiti.back.include]
+    rid_include         = [v.lower().replace(' ', '') for v in esiti.rid.include]
 
 
     d = gv.myDict()
     for key, value in d_src.items():
         partner  = value["PARTNER"]
-        prodotto = value["PRODOTTO"]
-        esito    = value["ESITO"]
+        prodotto = value["PRODOTTO"].lower().replace(' ', '')
+        esito    = value["ESITO"].lower().replace(' ', '')
 
         if not partner in d:
             d[partner] = gv.myDict()
@@ -130,31 +145,38 @@ def partnerPerAgente(d_src: dict):
             d[partner]["confermato"] = 0
             d[partner]["attivazione"] = 0
             d[partner]["back"] = 0
-            d[partner]["not_counted"] = 0
+            d[partner]["discarded"] = 0
+            d[partner]["excluded"] = 0
+            d[partner]["rid"] = 0
 
         ptr=d[partner]
         gv.logger.debug("processing word: %s", esito)
+        # esito = esito.lower().replace(' ', '')
+        # prodotto_trimmed = prodotto.lower().replace(' ', '')
 
-        esito_trimmed = esito.lower().replace(' ', '')
-        if excludeEsito(esito_trimmed, esiti_exclude):
+        if excludeData(esito, esiti_exclude):
+            d[partner]["excluded"] += 1
             continue
 
         if totale_include == "all":
             d[partner]["totale"] += 1
 
-        if includeData(esito_trimmed, confermato_include):
+        if includeData(prodotto, rid_include):
+            d[partner]["rid"] += 1 # non deve uscire
+
+        if includeData(esito, confermato_include):
             d[partner]["confermato"] += 1
             continue
 
-        if includeData(esito_trimmed, attivazione_include):
+        if includeData(esito, attivazione_include):
             d[partner]["attivazione"] += 1
             continue
 
-        if includeData(esito_trimmed, back_include):
+        if includeData(esito, back_include):
             d[partner]["back"] += 1
             continue
 
-        d[partner]["not_counted"] += 1
+        d[partner]["discarded"] += 1
     return d
 
 
@@ -170,6 +192,7 @@ def partnerPerAgente(d_src: dict):
 ###########################################################################
 def insertAgentInStruct(main_dict: dict, agents: dict):
     # print(agents.keys())
+    file_contratti_dettagliati = gv.working_files.file_contratti_dettagliati
     separator = '.'
     key_paths = main_dict.keypaths(gv.struttura_aziendale)
 
@@ -186,60 +209,14 @@ def insertAgentInStruct(main_dict: dict, agents: dict):
                 if agent_name in agents.keys():
                     gv.logger.info("adding %s results data", agent_name)
                     this_agent = agents.pop(agent_name)
-                    # print(agents.keys())
                     agent_results=this_agent["results"]
                     if isinstance(agent_results, dict):
                         main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
 
 
-    if fBenedict: # --- uso il jkypaths di benedict....
-        agent_col=6
-        for item in key_paths:
-            keypath = item.split(separator)
-            if len(keypath) >= agent_col:  ### colonna Agent
-                agent_name = keypath[-1]
-                if agent_name in agents.keys():
-                    this_agent= agents.pop(agent_name)
-                    gv.logger.info("adding %s results data", agent_name)
-                    agent_results=this_agent["results"]
-                    if isinstance(agent_results, dict):
-                        main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
-
-    dictUtils.toYaml(d=main_dict, filepath=f"{gv.tmpPath}/strutturaAziendaleWithAgentResuls.yaml", indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+    dictUtils.toYaml(d=main_dict, filepath=file_contratti_dettagliati, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
 
-
-#########################################################
-# per ogni partner crea un riga
-# ritorna list of list
-# nella prima riga mettiamo i totali_agente dei vari partner
-#########################################################
-def calculateResults(agent_data: dict, row: list) -> list:
-    new_rows = []
-    sunto_agente = row[:]
-    totali = 0
-    confermati = 0
-    attivazione = 0
-    back = 0
-    for partner_name in agent_data:
-        new_row=row[:]
-        ptr=agent_data[partner_name]
-        data_cols=[partner_name,
-                    ptr["totale"],
-                    ptr["confermato"],
-                    ptr["attivazione"],
-                    ptr["back"],
-                ]
-        totali      += ptr["totale"]
-        confermati  += ptr["confermato"]
-        attivazione += ptr["attivazione"]
-        back        += ptr["back"]
-
-        new_row.extend(data_cols)
-        new_rows.append(new_row)
-    sunto_agente.extend(["", totali, confermati, attivazione, back])
-    new_rows.insert(0, sunto_agente)
-    return new_rows
 
 
 
@@ -261,6 +238,8 @@ def retrieveContracts(contract_dict: dict, lista_agenti: list):
     d = gv.myDict()
     for name in lista_agenti:
         gv.logger.info("processing agent: %s", name)
+        name = name.replace("o'", "ò").replace("-", " ")
+        name = lnUtils.remove_extra_blanks(data=name)
         d[name] = gv.myDict()
 
         ### -----------------------------

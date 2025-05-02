@@ -3,14 +3,14 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 07.44.18
+# Date .........: 02-05-2025 08.58.25
 
 import sys; sys.dont_write_bytecode=True
 import os
 from benedict import benedict
 from pathlib import Path
 import pandas as pd
-
+from enum import Enum
 
 
 
@@ -39,6 +39,20 @@ import  prepare_gVars
 import  processData
 import  FileLoader
 
+class COLS(Enum):
+    Direttore         = 1
+    AreaManager       = 2
+    ManagerPlus       = 3
+    Manager           = 4
+    TeamManager       = 5
+    Agente            = 6
+    Partner           = 7
+    Esito_totale      = 8
+    Esito_completato  = 9
+    Esito_attivazione = 10
+    Esito_back        = 11
+
+
 
 
 # -------------------------------
@@ -55,6 +69,8 @@ def readConfig():
 
     gv.excel_config         = full_config.pop("excel") ### extrai la parte sqlite
     gv.struttura_aziendale  = full_config.pop("StrutturaAziendale") ### extrai la parte sqlite
+    gv.working_files        = full_config.pop("working_files") ### extrai la parte sqlite
+    gv.COLS = COLS
     # gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
 
 
@@ -70,7 +86,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-28_074418"
+    __ln_version__=f"{prj_name} version: V2025-05-02_085825"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 

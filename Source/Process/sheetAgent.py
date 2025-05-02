@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 20.27.20
+# Date .........: 02-05-2025 09.10.11
 #
 
 
@@ -29,9 +29,6 @@ def setup(gVars: (dict, SimpleNamespace)):
     gv=gVars
     gv.logger.caller(__name__)
     gv.excelBook=None
-    gv.tmpPath="/tmp/stefanoGirini"
-    Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
-
 
 
 
@@ -40,27 +37,21 @@ def setup(gVars: (dict, SimpleNamespace)):
 #################################################################
 #
 #################################################################
-def sheetAgent(d: dict):
+def createSheet(d: dict, calculateAgentResultsCB):
     colonne_gerarchia = gv.excel_config.output_sheet.colonne_gerarchia
     colonne_dati      = gv.excel_config.output_sheet.colonne_dati
 
-    sh_index          = COLS.Agente.value
-    sh_name           = COLS.Agente.name
-    # sheet_name        = colonne_gerarchia[sheet_index]
+    sh_index          = gv.COLS.Agente.value
+    sh_name           = gv.COLS.Agente.name
     separator         = '#'
-    flatten_data      = dictUtils.lnFlatten(gv.struttura_aziendale, separator = separator, index = True)
-    flatten_keys      = list(flatten_data.keys())
 
     ## catturiamo tutti i records fino al livello di agent creando dei keypath
-    keypaths = dictUtils.chunckList(flatten_keys, item_nrs=sh_index, separator=separator)
-    records = lnUtils.removeListOfListDuplicates(list_of_lists=keypaths, keep_order=True)
-
-    df = myDict()
+    keypaths = dictUtils.chunckList(gv.flatten_keys, item_nrs=sh_index, separator=separator)
 
     ### --- remove_empty_array items (columns_data)
-    # sheet_rows = [row for row in rows_data if not all(a == '-' for a in row)]
-    # for item in sheet_rows: gv.logger.debug(item)
-    ### ---
+    records = lnUtils.removeListOfListDuplicates(list_of_lists=keypaths, keep_order=True)
+
+
 
     ### --- find row where director changes in modo da inserire una riga di separazione
     ### --- da sviluppare
@@ -68,10 +59,8 @@ def sheetAgent(d: dict):
     ### ---
 
 
-    # --- aggiungiamo le colonne contenenti i risultati di default (=0)
-    # default_result_cols = []
-    default_result_cols = [""]
     # --- @Loreto: prepariamo il titolo
+    default_result_cols = [""]
     title_row = colonne_gerarchia[:sh_index]
     inx=0
     for col_name in colonne_dati:
@@ -88,7 +77,7 @@ def sheetAgent(d: dict):
         row=records[index]
         agent_data = d[row]
         if agent_data:
-            new_row=AGENT.calculateAgentResults(agent_data=agent_data, row=row)
+            new_row=calculateAgentResultsCB(agent_data=agent_data, row=row)
             # print(new_row)
             sheet_rows.extend(new_row)
         else:
@@ -109,11 +98,7 @@ def sheetAgent(d: dict):
         )
 
 
+    gv.logger.notify("creating sheet for Agents: %s", gv.args.output_agenti_filename)
     lnExcel.addSheet(filename=gv.args.output_agenti_filename, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
     lnExcel.setColumnSize(file_path=gv.args.output_agenti_filename, sheetname=sh_name)
-
-
-    import pdb; pdb.set_trace() # by Loreto
-    ...
-
 

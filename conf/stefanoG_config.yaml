@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 08.45.02
+# Date .........: 02-05-2025 14.52.26
 
 
 
@@ -16,7 +16,7 @@ ___templates:
             - In attivazione
             - Back
             - RID
-            - xxxx
+            # - xxxx
 
 
 
@@ -48,6 +48,13 @@ StrutturaAziendale:
                     ]
 
 
+working_files:
+    file_agents_data: "/tmp/stefanoContratti/agents_data.yaml"
+    file_agents_results: "/tmp/stefanoContratti/agents_results.yaml"
+    file_contratti_preprocess: "/tmp/stefanoContratti/contratti_preprocess.yaml"
+    file_contratti_dettagliati: "/tmp/stefanoContratti/contratti_dettagliati.yaml"
+    file_agenti_discrepanti: "/tmp/stefanoContratti/agenti_discrepanti.yaml"
+
 
 excel:
     # !include devices_DBase.lnk.yaml
@@ -70,7 +77,6 @@ excel:
         # saranno presenti in tutti i fogli con i dati sommati all'ultimo livello visualizzato nelle colonne precedenti
         colonne_dati:
             *RESULT_STRUCTURE
-
 
 
     source_sheet:
@@ -101,6 +107,12 @@ excel:
         attivazione:
             include:
                 - attivazione
+
+        rid:
+            include:
+                - rid
+
+
         back:
             include:
                 - Attesa

@@ -2,7 +2,7 @@
 
 #===============================================
 # updated by ...: Loreto Notarantonio
-# Date .........: 28-04-2025 20.31.21
+# Date .........: 02-05-2025 09.16.54
 #===============================================
 
 import sys; sys.dont_write_bytecode=True
@@ -63,6 +63,8 @@ def setMainVars(logger, prj_name, input_args, type: str=None, search_paths: list
     import dictUtils;        dictUtils.setup(gVars=gv)
     import processData;      processData.setup(gVars=gv)
     import ln_pandasExcel_Class;     ln_pandasExcel_Class.setup(gVars=gv)
+    import sheetAgent;     sheetAgent.setup(gVars=gv)
+    import sheetTeamManager;     sheetTeamManager.setup(gVars=gv)
 
 
     return gv
