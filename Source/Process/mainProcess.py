@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 08.51.17
+# Date .........: 04-05-2025 09.22.02
 #
 
 
@@ -19,9 +19,10 @@ import ln_pandasExcel_Class as lnExcel
 import lnUtils
 import dictUtils
 from ln_pandasExcel_Class import workBbookClass, sheetClass
-import processAgent
+# import processAgent
 import sheetAgent
 import sheetTeamManager
+import sheetManagers
 
 
 
@@ -29,12 +30,13 @@ def setup(gVars: (dict, SimpleNamespace)):
     global gv
     gv=gVars
     gv.logger.caller(__name__)
-    gv.excelBook=None
-    gv.tmpPath="/tmp/stefanoGirini"
-    Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
+    # gv.excelBook=None
+    # gv.tmpPath="/tmp/stefanoGirini"
+    # Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
 
-    # sheetAgent.sheetAgent.setup(gVars=gv)
-    processAgent.setup(gVars=gv)
+    sheetAgent.setup(gVars=gv)
+    sheetTeamManager.setup(gVars=gv)
+    sheetManagers.setup(gVars=gv)
 
 
 
@@ -341,8 +343,10 @@ def Main(gVars: dict):
     gv.flatten_keys = list(gv.flatten_data.keys())
     for item in gv.flatten_data: gv.logger.debug(item)
 
-
+    '''
     sheetAgent.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
     sheetTeamManager.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
+    '''
+    sheetTeamManager.prepareSheet(d=gv.struttura_aziendale, level=v.COLS.Manager.value, sh_name=gv.COLS.Manager.name)
 
 

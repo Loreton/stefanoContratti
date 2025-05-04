@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 02-05-2025 09.10.11
+# Date .........: 04-05-2025 09.20.03
 #
 
 
@@ -28,7 +28,7 @@ def setup(gVars: (dict, SimpleNamespace)):
     global gv
     gv=gVars
     gv.logger.caller(__name__)
-    gv.excelBook=None
+    # gv.excelBook=None
 
 
 
