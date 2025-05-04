@@ -24,7 +24,7 @@
             "justMyCode": false,
             "args": [
                 "--input-excel-filename=data/export_contratti_testcopy.xlsx",
-                "--output-agenti-filename=/tmp/contratti_agenti.xls",
+                "--output-agenti-filename=/tmp/contratti_agenti.xlsx",
                 "--nolnlibzip"
             ]
         }

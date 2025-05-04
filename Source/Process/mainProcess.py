@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 09.22.02
+# Date .........: 04-05-2025 19.25.44
 #
 
 
@@ -19,10 +19,11 @@ import ln_pandasExcel_Class as lnExcel
 import lnUtils
 import dictUtils
 from ln_pandasExcel_Class import workBbookClass, sheetClass
-# import processAgent
+
+import commonFunctions
 import sheetAgent
 import sheetTeamManager
-import sheetManagers
+import managersSheet
 
 
 
@@ -36,8 +37,8 @@ def setup(gVars: (dict, SimpleNamespace)):
 
     sheetAgent.setup(gVars=gv)
     sheetTeamManager.setup(gVars=gv)
-    sheetManagers.setup(gVars=gv)
-
+    managersSheet.setup(gVars=gv)
+    commonFunctions.setup(gVars=gv)
 
 
 
@@ -279,6 +280,11 @@ def calculateAgentResults(agent_data: dict, row: list) -> list:
 # Configurazioe dei reservation addresss (config host)
 ################################################################
 def Main(gVars: dict):
+    gv.colonne_gerarchia   = gv.excel_config.output_sheet.colonne_gerarchia
+    gv.colonne_dati        = gv.excel_config.output_sheet.colonne_dati
+
+
+
     excel_filename             = gv.args.input_excel_filename
     agenti_excel_filename      = gv.args.output_agenti_filename
     sheet_name                 = gv.excel_config.source_sheet.name
@@ -341,12 +347,15 @@ def Main(gVars: dict):
     ### -------------------------------------
     gv.flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator='#', index=True)
     gv.flatten_keys = list(gv.flatten_data.keys())
-    for item in gv.flatten_data: gv.logger.debug(item)
+    # for item in gv.flatten_data: gv.logger.debug(item)
+    gv.keypaths_list = dictUtils.flatten_keypaths_to_list(gv.flatten_keys, separator="#", item_nrs=6)
+
+    gv.default_result_cols = commonFunctions.result_columns()
 
     '''
     sheetAgent.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
     sheetTeamManager.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
     '''
-    sheetTeamManager.prepareSheet(d=gv.struttura_aziendale, level=v.COLS.Manager.value, sh_name=gv.COLS.Manager.name)
+    managersSheet.createSheet(d=gv.struttura_aziendale, level=gv.COLS.Manager.value, sh_name=gv.COLS.Manager.name)
 
 

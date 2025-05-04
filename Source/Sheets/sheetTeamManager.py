@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 09.20.00
+# Date .........: 04-05-2025 20.05.23
 #
 
 
@@ -18,13 +18,13 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 
 
-this=sys.modules[__name__]
+self=sys.modules[__name__]
 
 import ln_pandasExcel_Class as lnExcel
 import lnUtils
 import dictUtils
 from ln_pandasExcel_Class import workBbookClass, sheetClass
-# import xlwt
+import commonFunctions
 
 
 def setup(gVars: (dict, SimpleNamespace)):
@@ -34,28 +34,6 @@ def setup(gVars: (dict, SimpleNamespace)):
     # gv.excelBook=None
 
 
-def setColumnSize(ws):
-    # Auto-adjust column widths
-    for col in ws.columns:
-        max_length = 0
-        column = col[0].column_letter  # Get the column name (e.g., 'A')
-        for cell in col:
-            try:
-                if cell.value:
-                    max_length = max(max_length, len(str(cell.value)))
-            except:
-                pass
-        adjusted_width = (max_length + 2)
-        ws.column_dimensions[column].width = adjusted_width
-
-
-
-def setTitle(ws):
-    gray = 'b2b2b2'
-    # formatting the header columns, filling red color
-    for col in range(1, ws.max_column + 1):
-       cell_header = ws.cell(1, col)
-       cell_header.fill = PatternFill(start_color=gray, end_color=gray, fill_type="solid") #used hex code for red color
 
 
 ############################################################
@@ -81,7 +59,7 @@ def processAgentList(agent_list: list, partner_column: dict, somma: list):
             ### --- calcoliamo i valori
             for partner, data in agent_data.items():
                 if not partner in partner_column:
-                    partner_column[partner] = this.default_result_cols[1:] ## skip partner name
+                    partner_column[partner] = self.default_result_cols[1:] ## skip partner name
                     # partner_col_data[partner][0] = partner
 
                 ptr = partner_column[partner]
@@ -105,8 +83,8 @@ def processAgentList(agent_list: list, partner_column: dict, somma: list):
 #
 #################################################################
 def createSheet(d: dict, calculateAgentResultsCB):
-    colonne_gerarchia   = gv.excel_config.output_sheet.colonne_gerarchia
-    colonne_dati        = gv.excel_config.output_sheet.colonne_dati
+    # colonne_gerarchia   = gv.excel_config.output_sheet.colonne_gerarchia
+    # colonne_dati        = gv.excel_config.output_sheet.colonne_dati
 
     sh_index          = gv.COLS.TeamManager.value
     sh_name           = gv.COLS.TeamManager.name
@@ -123,18 +101,19 @@ def createSheet(d: dict, calculateAgentResultsCB):
 
 
     # --- aggiungiamo le colonne contenenti i risultati di default (=0)
-    this.default_result_cols = [""]
-    # --- @Loreto: prepariamo il titolo
-    title_row = colonne_gerarchia[:sh_index]
-    inx=0
-    for col_name in colonne_dati:
-        title_row.append(col_name)
-        if inx > 0:
-            this.default_result_cols.append(0) ### - Valore di default
-        inx+=1
+    # self.default_result_cols = [""]
+    # # --- @Loreto: prepariamo il titolo
+    # title_row = gv.colonne_gerarchia[:sh_index]
+    # inx=0
+    # for col_name in gv.colonne_dati:
+    #     title_row.append(col_name)
+    #     if inx > 0:
+    #         self.default_result_cols.append(0) ### - Valore di default
+    #     inx+=1
 
+    # gv.default_result_cols = commonFunctions.result_columns()
 
-
+    title_row = commonFunctions.prepareTitleRow(index=sh_index)
     # -------------------------------------------------------------------------------------
     # --- @Loreto: riempiamo le colonne dati con il valori agente
     #--- creiamo un dictionary con key=partner
@@ -148,13 +127,13 @@ def createSheet(d: dict, calculateAgentResultsCB):
     row_to_be_colored =[]
     for index in range(len(records)):
         partner_col_data = gv.myDict()
-        tm_somma=this.default_result_cols[1:] ### conterrà la somma dei vari partner
+        tm_somma=gv.default_result_cols[1:] ### conterrà la somma dei vari partner
         tm_keypath=records[index] ## riga corrente
         gv.logger.info("analysing data for teamManager %s:", tm_keypath[-1])
         agent_list = d[tm_keypath] ### - lista degli agenti sotto questo teamManager
 
         ### --- aggiunge tutte le rige dei  partner soomati per i relativi agenti
-        processAgentList(agent_list=agent_list, partner_column=partner_col_data, somma=tm_somma)
+        commonFunctions.processAgentList(agent_list=agent_list, partner_column=partner_col_data, somma=tm_somma)
 
         new_row = tm_keypath[:]
         ### --- riga con i totali per teamManager
@@ -188,9 +167,9 @@ def createSheet(d: dict, calculateAgentResultsCB):
 
     lnExcel.addSheet(filename=gv.args.output_agenti_filename, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
 
-    ### --- creaim il range del TManager e relativi risultati
+    ### --- crea il range del TManager e relativi risultati
     cell_range=[]
-    for col in range(5, len(title_row)+1):
+    for col in range(gv.COLS.TeamManager.value, len(title_row)+1):
         row_cells = [(row, col) for row in row_to_be_colored]
         cell_range.extend(row_cells)
 

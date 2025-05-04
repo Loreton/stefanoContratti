@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 09.20.03
+# Date .........: 04-05-2025 09.36.58
 #
 
 
@@ -38,8 +38,8 @@ def setup(gVars: (dict, SimpleNamespace)):
 #
 #################################################################
 def createSheet(d: dict, calculateAgentResultsCB):
-    colonne_gerarchia = gv.excel_config.output_sheet.colonne_gerarchia
-    colonne_dati      = gv.excel_config.output_sheet.colonne_dati
+    # colonne_gerarchia = gv.excel_config.output_sheet.colonne_gerarchia
+    # colonne_dati      = gv.excel_config.output_sheet.colonne_dati
 
     sh_index          = gv.COLS.Agente.value
     sh_name           = gv.COLS.Agente.name
@@ -61,9 +61,9 @@ def createSheet(d: dict, calculateAgentResultsCB):
 
     # --- @Loreto: prepariamo il titolo
     default_result_cols = [""]
-    title_row = colonne_gerarchia[:sh_index]
+    title_row = gv.colonne_gerarchia[:sh_index]
     inx=0
-    for col_name in colonne_dati:
+    for col_name in gv.colonne_dati:
         title_row.append(col_name)
         if inx > 0:
             default_result_cols.append(0) ### - Valore di default
