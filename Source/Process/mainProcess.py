@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 19.25.44
+# Date .........: 05-05-2025 12.57.53
 #
 
 
@@ -21,9 +21,10 @@ import dictUtils
 from ln_pandasExcel_Class import workBbookClass, sheetClass
 
 import commonFunctions
-import sheetAgent
-import sheetTeamManager
-import managersSheet
+# import sheetAgent
+# import sheetTeamManager
+# import managersSheet
+import Sheets
 
 
 
@@ -35,10 +36,11 @@ def setup(gVars: (dict, SimpleNamespace)):
     # gv.tmpPath="/tmp/stefanoGirini"
     # Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
 
-    sheetAgent.setup(gVars=gv)
-    sheetTeamManager.setup(gVars=gv)
-    managersSheet.setup(gVars=gv)
+    # sheetAgent.setup(gVars=gv)
+    # sheetTeamManager.setup(gVars=gv)
+    # managersSheet.setup(gVars=gv)
     commonFunctions.setup(gVars=gv)
+    Sheets.setup(gVars=gv)
 
 
 
@@ -98,18 +100,20 @@ def partnerPerAgente(d_src: dict):
 
         if not partner in d:
             d[partner] = gv.myDict()
+            d[partner]["processati"] = 0
+            d[partner]["discarded"] = 0
+            d[partner]["excluded"] = 0
             d[partner]["totale"] = 0
             d[partner]["confermato"] = 0
             d[partner]["attivazione"] = 0
             d[partner]["back"] = 0
-            d[partner]["discarded"] = 0
-            d[partner]["excluded"] = 0
             d[partner]["rid"] = 0
 
         ptr=d[partner]
         gv.logger.debug("processing word: %s", esito)
         # esito = esito.lower().replace(' ', '')
         # prodotto_trimmed = prodotto.lower().replace(' ', '')
+        d[partner]["processati"] += 1
 
         if excludeData(esito, esiti_exclude):
             d[partner]["excluded"] += 1
@@ -285,22 +289,24 @@ def Main(gVars: dict):
 
 
 
-    excel_filename             = gv.args.input_excel_filename
-    agenti_excel_filename      = gv.args.output_agenti_filename
     sheet_name                 = gv.excel_config.source_sheet.name
     selected_columns           = gv.excel_config.source_sheet.columns_to_be_extracted
-    file_agents_data           = gv.working_files.file_agents_data
-    file_agents_results        = gv.working_files.file_agents_results
-    file_contratti_preprocess  = gv.working_files.file_contratti_preprocess
-    file_agenti_discrepanti   = gv.working_files.file_agenti_discrepanti
+    gv.excel_filename             = Path(gv.args.input_excel_filename).resolve()
+    agenti_excel_filename      = Path(gv.args.output_agenti_filename).resolve()
+    file_agents_data           = Path(gv.working_files.file_agents_data).resolve()
+    file_agents_results        = Path(gv.working_files.file_agents_results).resolve()
+    file_contratti_preprocess  = Path(gv.working_files.file_contratti_preprocess).resolve()
+    file_agenti_discrepanti    = Path(gv.working_files.file_agenti_discrepanti).resolve()
 
     ### -------------------------------
     ### --- read contracts data
     ### -------------------------------
-    gv.workBook  = workBbookClass(excel_filename=excel_filename, logger=gv.logger)
+    gv.workBook  = workBbookClass(excel_filename=gv.excel_filename, logger=gv.logger)
     sh_contratti = sheetClass(wbClass=gv.workBook, sheet_name_nr=0)
     dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
     dictUtils.toYaml(d=dict_contratti, filepath=file_contratti_preprocess, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+    gv.workBook.close()
+    # import pdb; pdb.set_trace() # by Loreto
 
 
     ### -------------------------------------
@@ -354,8 +360,14 @@ def Main(gVars: dict):
 
     '''
     sheetAgent.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
+    managersSheet.createSheet(d=gv.struttura_aziendale, level=gv.COLS.Manager.value, sh_name=gv.COLS.Manager.name)
     sheetTeamManager.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
     '''
-    managersSheet.createSheet(d=gv.struttura_aziendale, level=gv.COLS.Manager.value, sh_name=gv.COLS.Manager.name)
+    Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Direttore)
+    Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.AreaManager)
+    Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.ManagerPlus)
+    Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Manager)
+    Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.TeamManager)
+    Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Agente)
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 20.05.23
+# Date .........: 05-05-2025 08.47.35
 #
 
 
@@ -132,7 +132,7 @@ def createSheet(d: dict, calculateAgentResultsCB):
         gv.logger.info("analysing data for teamManager %s:", tm_keypath[-1])
         agent_list = d[tm_keypath] ### - lista degli agenti sotto questo teamManager
 
-        ### --- aggiunge tutte le rige dei  partner soomati per i relativi agenti
+        ### --- aggiunge tutte le rige dei  partner sommati per i relativi agenti
         commonFunctions.processAgentList(agent_list=agent_list, partner_column=partner_col_data, somma=tm_somma)
 
         new_row = tm_keypath[:]

@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 08.48.02
+# Date .........: 05-05-2025 08.34.23
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -52,6 +52,14 @@ class COLS(Enum):
     Esito_attivazione = 10
     Esito_back        = 11
 
+class HIERARCHY(Enum):
+    Direttore         = 1
+    AreaManager       = 2
+    ManagerPlus       = 3
+    Manager           = 4
+    TeamManager       = 5
+    Agente            = 6
+
 
 
 
@@ -70,7 +78,8 @@ def readConfig():
     gv.excel_config         = full_config.pop("excel") ### extrai la parte sqlite
     gv.struttura_aziendale  = full_config.pop("StrutturaAziendale") ### extrai la parte sqlite
     gv.working_files        = full_config.pop("working_files") ### extrai la parte sqlite
-    gv.COLS = COLS
+    # gv.COLS = COLS
+    gv.HIERARCHY = HIERARCHY
     # gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
 
 
@@ -86,7 +95,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-05-04_084802"
+    __ln_version__=f"{prj_name} version: V2025-05-05_083423"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 

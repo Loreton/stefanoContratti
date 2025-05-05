@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 20.07.04
+# Date .........: 05-05-2025 12.19.28
 #
 
 
@@ -25,27 +25,13 @@ from ln_pandasExcel_Class import workBbookClass, sheetClass
 
 
 
-class COLS(Enum):
-    Direttore         = 1
-    AreaManager       = 2
-    ManagerPlus       = 3
-    Manager           = 4
-    TeamManager       = 5
-    Agente            = 6
-    Partner           = 7
-    Esito_totale      = 8
-    Esito_completato  = 9
-    Esito_attivazione = 10
-    Esito_back        = 11
-
 
 def setup(gVars: (dict, SimpleNamespace)):
     global gv
     gv=gVars
     gv.logger.caller(__name__)
-    # gv.excelBook=None
-    # gv.tmpPath="/tmp/stefanoGirini"
-    # Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
+
+
 
 
 
@@ -77,8 +63,8 @@ def setTitle(ws):
        cell_header.fill = PatternFill(start_color=gray, end_color=gray, fill_type="solid") #used hex code for red color
 
 
+# Auto-adjust Excel column widths
 def setColumnSize(ws):
-    # Auto-adjust column widths
     for col in ws.columns:
         max_length = 0
         column = col[0].column_letter  # Get the column name (e.g., 'A')
@@ -90,6 +76,7 @@ def setColumnSize(ws):
                 pass
         adjusted_width = (max_length + 2)
         ws.column_dimensions[column].width = adjusted_width
+        gv.logger.notify("setting %s col_width to: %s", column, adjusted_width)
 
 
 
@@ -108,27 +95,31 @@ def setCellsColor(ws, cells: list, color='ffffa6'):
 
 
 
+
+def partnerData(agent_data: dict, partner_column: dict, somma: list):
+    for partner, data in agent_data.items():
+        if not partner in partner_column:
+            partner_column[partner] = gv.default_result_cols[1:] ## skip partner name
+            # partner_col_data[partner][0] = partner
+
+        ptr = partner_column[partner]
+        ptr[0] += data["totale"]
+        ptr[1] += data["confermato"]
+        ptr[2] += data["attivazione"]
+        ptr[3] += data["back"]
+        ptr[4] += data["rid"]
+
+        ### --- aggiorniamo il totale
+        somma[0] += data["totale"]
+        somma[1] += data["confermato"]
+        somma[2] += data["attivazione"]
+        somma[3] += data["back"]
+        somma[4] += data["rid"]
+
+
 def processAgentList(agent_list: list, partner_column: dict, somma: list):
     for agent_name in agent_list:
         gv.logger.info("    agent: %s", agent_name)
         if agent_data:=gv.agent_results.get(agent_name): # se presente....
-            ### --- calcoliamo i valori
-            for partner, data in agent_data.items():
-                if not partner in partner_column:
-                    partner_column[partner] = gv.default_result_cols[1:] ## skip partner name
-                    # partner_col_data[partner][0] = partner
-
-                ptr = partner_column[partner]
-                ptr[0] += data["totale"]
-                ptr[1] += data["confermato"]
-                ptr[2] += data["attivazione"]
-                ptr[3] += data["back"]
-                ptr[4] += data["rid"]
-
-                ### --- aggiorniamo il totale
-                somma[0] += data["totale"]
-                somma[1] += data["confermato"]
-                somma[2] += data["attivazione"]
-                somma[3] += data["back"]
-                somma[4] += data["rid"]
+            partnerData(agent_data=agent_data, partner_column=partner_column, somma=somma)
 
