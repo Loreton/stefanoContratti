@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 08.34.23
+# Date .........: 05-05-2025 16.43.51
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -39,18 +39,19 @@ import  prepare_gVars
 import  mainProcess
 import  FileLoader
 
-class COLS(Enum):
-    Direttore         = 1
-    AreaManager       = 2
-    ManagerPlus       = 3
-    Manager           = 4
-    TeamManager       = 5
-    Agente            = 6
-    Partner           = 7
-    Esito_totale      = 8
-    Esito_completato  = 9
-    Esito_attivazione = 10
-    Esito_back        = 11
+class dataCols(Enum):
+    PROCESSATI     = 0
+    EXCLUDED       = 1
+    INSERITI       = 2
+    SCARTATI       = 3
+    TOTALE         = 4
+    CONFERMATI     = 5
+    ATTIVAZIONE    = 6
+    BACK           = 7
+    RID            = 8
+    VAS            = 9
+    SIM            = 10
+    TV             = 11
 
 class HIERARCHY(Enum):
     Direttore         = 1
@@ -80,6 +81,7 @@ def readConfig():
     gv.working_files        = full_config.pop("working_files") ### extrai la parte sqlite
     # gv.COLS = COLS
     gv.HIERARCHY = HIERARCHY
+    gv.dataCols   = dataCols
     # gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
 
 
@@ -95,7 +97,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-05-05_083423"
+    __ln_version__=f"{prj_name} version: V2025-05-05_164351"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 

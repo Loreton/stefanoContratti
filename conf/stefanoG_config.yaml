@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 08.57.06
+# Date .........: 05-05-2025 16.21.06
 
 
 
@@ -11,11 +11,18 @@
 ___templates:
     ___resultStruct: &RESULT_STRUCTURE
             - Partner
+            - Processati
+            - Excluded
+            - Inseriti
+            - Scartati
             - Totale
             - Confermati
             - In attivazione
             - Back
             - RID
+            - VAS
+            - SIM
+            - TV
             # - xxxx
 
 
@@ -72,7 +79,6 @@ excel:
             - Manager
             - Team Manager
             - Agente
-            # - Partner
 
         # saranno presenti in tutti i fogli con i dati sommati all'ultimo livello visualizzato nelle colonne precedenti
         colonne_dati:
@@ -97,30 +103,45 @@ excel:
             - doppia prenotazione
             - ko < 12 mesi
 
-        totale:
-            include: all
+        # totale:
+        #     include: all
 
         confermato:
-            include:
-                - confermato
+            - confermato
 
         attivazione:
-            include:
-                - attivazione
-
-        rid:
-            include:
-                - rid
-
+            - in attivazione
 
         back:
-            include:
-                - Attesa
-                - Prenotato
-                - Gestito
-                - NonConforme
-                - "In lavorazione"
-                - Accettato
+            - Attesa
+            - Gestito
+            - Non Conforme
+            - Prenotato
+            - lavorazione
+            - Accettato
+
+
+    prodotto_keywords:
+        rid:
+            - rid
+
+        vas:
+            - vas
+
+        sim:
+            - sim
+            - mobile
+
+        tv:
+            - "Tim Vision"
+            - "Tim Gold"
+            - "Tim Disney"
+            - "Tim Calcio"
+            - "Tim Intrattenimento"
+            - "Tim Netflix"
+            - "Tim Mobile"
+
+
 
 
 

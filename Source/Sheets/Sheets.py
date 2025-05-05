@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 12.23.49
+# Date .........: 05-05-2025 17.49.29
 #
 
 
@@ -71,7 +71,8 @@ def create(d: dict, hierarchy_level):
 
     for index in range(len(hier_keypaths)):
         partner_col_data = gv.myDict()
-        tm_somma=gv.default_result_cols[1:] ### conterrà la somma dei vari partner
+        # tm_somma=gv.default_result_cols[:] ### conterrà la somma dei vari partner
+        tm_somma=commonFunctions.result_columns() ### conterrà la somma dei vari partner
 
         this_level_kp=hier_keypaths[index] ## riga corrente
 
@@ -139,3 +140,31 @@ def create(d: dict, hierarchy_level):
     ws.freeze_panes = ws['B2'] ## Freeze everything to left of B (that is A) and no columns to feeze
     wb.save(excel_file_path)
 
+
+
+
+def agentiNonTrovati(agents: list):
+    ### - creiamo il dataFrame
+
+    sh_name = "Agents NOT found"
+    title_row = ["Agenti NON trovati"]
+    rows_data = []
+    for agent_name in list(agents.keys()):
+        rows_data.append(agent_name)
+
+    df = pd.DataFrame(
+            # columns = colonne_gerarchia[:inx+1],
+            columns = title_row,
+            data    = rows_data
+        )
+
+    excel_file_path=gv.args.output_agenti_filename
+    excel_file_path=gv.excel_filename
+    # lnExcel.addSheet(filename=gv.args.output_agenti_filename, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
+    lnExcel.addSheet(filename=excel_file_path, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
+
+    wb = openpyxl.load_workbook(excel_file_path)
+    ws = wb[sh_name]
+    commonFunctions.setColumnSize(ws)
+    ws.freeze_panes = ws['B2'] ## Freeze everything to left of B (that is A) and no columns to feeze
+    wb.save(excel_file_path)

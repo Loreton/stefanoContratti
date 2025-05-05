@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 12.19.28
+# Date .........: 05-05-2025 17.44.54
 #
 
 
@@ -39,8 +39,10 @@ def setup(gVars: (dict, SimpleNamespace)):
 def prepareTitleRow(index: int):
     # --- @Loreto: prepariamo il titolo
     title_row = gv.colonne_gerarchia[:index]
-    for col_name in gv.colonne_dati:
-        title_row.append(col_name)
+    title_row.append("Partner")
+    # for col_name in gv.colonne_dati:
+    for col in gv.dataCols:
+        title_row.append(col.name)
     return title_row
 
 
@@ -48,9 +50,10 @@ def prepareTitleRow(index: int):
 def result_columns():
     # --- aggiungiamo le colonne contenenti i risultati di default (=0)
     default_result_cols = []
-    for col_name in gv.colonne_dati:
+    # for col_name in gv.colonne_dati:
+    for col in gv.dataCols:
         default_result_cols.append(0) ### - Valore di default
-    default_result_cols[0] = "" ### replace with blank value
+    # default_result_cols[0] = "" ### replace with blank value
     return default_result_cols
 
 
@@ -65,18 +68,24 @@ def setTitle(ws):
 
 # Auto-adjust Excel column widths
 def setColumnSize(ws):
-    for col in ws.columns:
-        max_length = 0
-        column = col[0].column_letter  # Get the column name (e.g., 'A')
-        for cell in col:
-            try:
-                if cell.value:
-                    max_length = max(max_length, len(str(cell.value)))
-            except:
-                pass
-        adjusted_width = (max_length + 2)
-        ws.column_dimensions[column].width = adjusted_width
-        gv.logger.notify("setting %s col_width to: %s", column, adjusted_width)
+
+    from openpyxl.utils import get_column_letter
+    for idx, col in enumerate(ws.columns, 1):
+        ws.column_dimensions[get_column_letter(idx)].auto_size = True
+    return
+
+    # for col in ws.columns:
+    #     max_length = 0
+    #     column = col[0].column_letter  # Get the column name (e.g., 'A')
+    #     for cell in col:
+    #         try:
+    #             if cell.value:
+    #                 max_length = max(max_length, len(str(cell.value)))
+    #         except:
+    #             pass
+    #     adjusted_width = (max_length + 2)
+    #     ws.column_dimensions[column].width = adjusted_width
+    #     gv.logger.notify("setting %s col_width to: %s", column, adjusted_width)
 
 
 
@@ -97,24 +106,68 @@ def setCellsColor(ws, cells: list, color='ffffa6'):
 
 
 def partnerData(agent_data: dict, partner_column: dict, somma: list):
+    dc = gv.dataCols
     for partner, data in agent_data.items():
         if not partner in partner_column:
-            partner_column[partner] = gv.default_result_cols[1:] ## skip partner name
+            partner_column[partner] = gv.default_result_cols[:] ## skip partner name
             # partner_col_data[partner][0] = partner
 
         ptr = partner_column[partner]
-        ptr[0] += data["totale"]
-        ptr[1] += data["confermato"]
-        ptr[2] += data["attivazione"]
-        ptr[3] += data["back"]
-        ptr[4] += data["rid"]
+        # import pdb; pdb.set_trace() # by Loreto
+        # ptr[0] += data["processati"]
+        # ptr[1] += data["discarded"]
+        # ptr[2] += data["excluded"]
+        # ptr[3] += data["totale"]
+        # ptr[4] += data["confermato"]
+        # ptr[5] += data["attivazione"]
+        # ptr[6] += data["back"]
+        # ptr[7] += data["rid"]
+
+        ptr[0] += data[dc.PROCESSATI.name]
+        ptr[1] += data[dc.EXCLUDED.name]
+        ptr[2] += data[dc.INSERITI.name]
+        ptr[3] += data[dc.SCARTATI.name]
+        ptr[4] += data[dc.TOTALE.name]
+        ptr[5] += data[dc.CONFERMATI.name]
+        ptr[6] += data[dc.ATTIVAZIONE.name]
+        ptr[7] += data[dc.BACK.name]
+        ptr[8] += data[dc.RID.name]
+        ptr[9] += data[dc.VAS.name]
+        ptr[10] += data[dc.SIM.name]
+        ptr[11] += data[dc.TV.name]
+
+
 
         ### --- aggiorniamo il totale
-        somma[0] += data["totale"]
-        somma[1] += data["confermato"]
-        somma[2] += data["attivazione"]
-        somma[3] += data["back"]
-        somma[4] += data["rid"]
+        somma[0] += data[dc.PROCESSATI.name]
+        somma[1] += data[dc.EXCLUDED.name]
+        somma[2] += data[dc.INSERITI.name]
+        somma[3] += data[dc.SCARTATI.name]
+        somma[4] += data[dc.TOTALE.name]
+        somma[5] += data[dc.CONFERMATI.name]
+        somma[6] += data[dc.ATTIVAZIONE.name]
+        somma[7] += data[dc.BACK.name]
+        somma[8] += data[dc.RID.name]
+        somma[9] += data[dc.VAS.name]
+        somma[10] += data[dc.SIM.name]
+        somma[11] += data[dc.TV.name]
+
+
+
+
+        # somma[0] += data["processati"]
+        # somma[1] += data["discarded"]
+        # somma[2] += data["excluded"]
+        # somma[3] += data["totale"]
+        # somma[4] += data["confermato"]
+        # somma[5] += data["attivazione"]
+        # somma[6] += data["back"]
+        # somma[7] += data["rid"]
+
+
+
+
+
 
 
 def processAgentList(agent_list: list, partner_column: dict, somma: list):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 13.05.33
+# Date .........: 05-05-2025 17.48.48
 #
 
 
@@ -55,7 +55,7 @@ def setup(gVars: (dict, SimpleNamespace)):
 ################################################################
 def partnerPerAgente(d_src: dict):
     #-------------------------------------------------
-    def includeData(word: str, include_list: list):
+    def includeData_(word: str, include_list: list):
         fConfirmed = False
         for include_value in include_list:
             if include_value in word:
@@ -65,7 +65,7 @@ def partnerPerAgente(d_src: dict):
         return fConfirmed
 
 
-    def excludeData(word: str, exclude_list: list):
+    def excludeData_(word: str, exclude_list: list):
         fExcluded = False
         for excl_value in exclude_list:
             if excl_value in word:
@@ -74,70 +74,182 @@ def partnerPerAgente(d_src: dict):
                 break
 
         return fExcluded
+
+
+
+    def includeData_(source_list: list, search_list: list):
+        fConfirmed = False
+        common_items = [item for item in search_list if item in source_list]
+        if common_items:
+            fConfirmed = True
+        return fConfirmed
+
+
+    def excludeData_(source_list: list, search_list: list):
+        fExcluded = False
+        common_items = [item for item in search_list if item in source_list]
+        if common_items:
+            fConfirmed = True
+        return fExcluded
+
+
+###################################################################
+# compara un lista con un'altra.
+# Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
+# ...e si fa la comparazione con tutte le parole in AND
+###################################################################
+    def includeData(source_list: list, search_list: list):
+        fConfirmed = False
+        for include_value in search_list:
+            if ' ' in include_value:
+                include_value = include_value.split()
+            else:
+                include_value = [include_value]
+
+            common_items = [item for item in include_value if item in source_list]
+            if len(common_items) == len(include_value):
+                gv.logger.debug("including due to: %s", include_value)
+                fConfirmed = True
+                break
+
+        return fConfirmed
+
+###################################################################
+# compara un lista con un'altra.
+# Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
+# ...e si fa la comparazione con tutte le parole in AND
+###################################################################
+    def excludeData(source_list: list, search_list: list):
+        fExcluded = False
+        for exclude_value in search_list:
+            if ' ' in exclude_value:
+                exclude_value = exclude_value.split()
+            else:
+                exclude_value = [exclude_value]
+
+            common_items = [item for item in exclude_value if item in source_list]
+            if len(common_items) == len(exclude_value):
+                gv.logger.debug("excluding due to: %s", exclude_value)
+                fExcluded = True
+                break
+
+        return fExcluded
+
     #-------------------------------------------------
 
 
-    esiti               = gv.excel_config.esito_keywords
-    totale_include      = gv.excel_config.esito_keywords.totale.include
+    # esito_keys              = gv.excel_config.esito_keywords
+    # product_keys            = gv.excel_config.prodotto_keywords
 
     # ----------------------------------------
     # - valori di include/exclude
     # ----------------------------------------
 
     # --- remove blanks inside item's list
-    esiti_exclude       = [v.lower().replace(' ', '') for v in esiti.exclude]
-    confermato_include  = [v.lower().replace(' ', '') for v in esiti.confermato.include]
-    attivazione_include = [v.lower().replace(' ', '') for v in esiti.attivazione.include]
-    back_include        = [v.lower().replace(' ', '') for v in esiti.back.include]
-    rid_include         = [v.lower().replace(' ', '') for v in esiti.rid.include]
+    # esito_exclude       = [v.lower().replace(' ', '_') for v in esito.exclude]
+    # esito_confermato    = [v.lower().replace(' ', '_') for v in esito.confermato]
+    # esito_attivazione   = [v.lower().replace(' ', '_') for v in esito.attivazione]
+    # esito_back          = [v.lower().replace(' ', '_') for v in esito.back]
 
+    # prodotto_rid         = [v.lower().replace(' ', '_') for v in prodotto.rid]
+    # prodotto_vas         = [v.lower().replace(' ', '_') for v in prodotto.vas]
+    # prodotto_sim         = [v.lower().replace(' ', '_') for v in prodotto.sim]
+    # prodotto_tv          = [v.lower().replace(' ', '_') for v in prodotto.tv]
+
+    esito_exclude       = [v.lower() for v in gv.excel_config.esito_keywords.exclude]
+    esito_confermato    = [v.lower() for v in gv.excel_config.esito_keywords.confermato]
+    esito_attivazione   = [v.lower() for v in gv.excel_config.esito_keywords.attivazione]
+    esito_back          = [v.lower() for v in gv.excel_config.esito_keywords.back]
+
+    prodotto_rid         = [v.lower() for v in gv.excel_config.prodotto_keywords.rid]
+    prodotto_vas         = [v.lower() for v in gv.excel_config.prodotto_keywords.vas]
+    prodotto_sim         = [v.lower() for v in gv.excel_config.prodotto_keywords.sim]
+    prodotto_tv          = [v.lower() for v in gv.excel_config.prodotto_keywords.tv]
 
     d = gv.myDict()
+    dc=gv.dataCols
+
     for key, value in d_src.items():
+        xx=''
         partner  = value["PARTNER"]
-        prodotto = value["PRODOTTO"].lower().replace(' ', '')
-        esito    = value["ESITO"].lower().replace(' ', '')
+
+        ### --- Modifico esoto e prodotto per fare una ricerca affidabile
+        prodotto = value["PRODOTTO"].lower()
+        # prodotto = prodotto.replace("tim ", "tim_")
+        if "netflix" in prodotto:
+            # import pdb; pdb.set_trace() # by Loreto
+            xx="TIM"
+        prodotto = prodotto.split()
+
+        esito    = value["ESITO"].lower()
+        if esito == "confermato" and xx == "TIM":
+            xx="OK"
+        # esito    = esito.replace("non ", "non_")
+        esito    = esito.split()
 
         if not partner in d:
+            ### --- creazione struttura partner
             d[partner] = gv.myDict()
-            d[partner]["processati"] = 0
-            d[partner]["discarded"] = 0
-            d[partner]["excluded"] = 0
-            d[partner]["totale validi"] = 0
-            d[partner]["confermato"] = 0
-            d[partner]["attivazione"] = 0
-            d[partner]["back"] = 0
-            d[partner]["rid"] = 0
+            for item in dc:
+                d[partner][item.name] = 0
+
+            # d[partner]["processati"] = 0
+            # d[partner]["discarded"] = 0
+            # d[partner]["excluded"] = 0
+            # d[partner]["totale"] = 0
+            # d[partner]["confermato"] = 0
+            # d[partner]["attivazione"] = 0
+            # d[partner]["back"] = 0
+            # d[partner]["rid"] = 0
+            # d[partner]["vas"] = 0
+            # d[partner]["sim"] = 0
+            # d[partner]["tv"] = 0
+            # d[partner]["inseriti"] = 0
 
         ptr=d[partner]
-        gv.logger.debug("processing word: %s", esito)
-        # esito = esito.lower().replace(' ', '')
-        # prodotto_trimmed = prodotto.lower().replace(' ', '')
-        d[partner]["processati"] += 1
+        gv.logger.debug("processing esito: %s", esito)
+        gv.logger.debug("processing prodotto: %s", prodotto)
 
-        if excludeData(esito, esiti_exclude):
-            d[partner]["excluded"] += 1
+        ### --- tutti i contratti presenti nel foglio
+        d[partner][dc.PROCESSATI.name] += 1
+
+        if excludeData(esito, esito_exclude):
+            d[partner][dc.EXCLUDED.name] += 1
             continue
 
-        if totale_include == "all":
-            d[partner]["totale"] += 1
+        isValid=False
+        if includeData(esito, esito_confermato):
+            d[partner][dc.CONFERMATI.name] += 1
+            isValid=True
+            # continue
 
-        if includeData(prodotto, rid_include):
-            d[partner]["rid"] += 1 # non deve uscire
+        elif includeData(esito, esito_attivazione):
+            d[partner][dc.ATTIVAZIONE.name] += 1
+            isValid=True
+            # continue
 
-        if includeData(esito, confermato_include):
-            d[partner]["confermato"] += 1
-            continue
+        elif includeData(esito, esito_back):
+            d[partner][dc.BACK.name] += 1
+            isValid=True
+            # continue
 
-        if includeData(esito, attivazione_include):
-            d[partner]["attivazione"] += 1
-            continue
+        if isValid:
+            d[partner][dc.TOTALE.name] += 1
+            ### --- verifichiamo i prodotti
+            if includeData(prodotto, prodotto_rid):
+                d[partner][dc.RID.name] += 1
+            if includeData(prodotto, prodotto_vas):
+                d[partner][dc.VAS.name] += 1
+            if includeData(prodotto, prodotto_sim):
+                d[partner][dc.SIM.name] += 1
+            if includeData(prodotto, prodotto_tv):
+                d[partner][dc.TV.name] += 1
+        else:
+            d[partner][dc.SCARTATI.name] += 1
 
-        if includeData(esito, back_include):
-            d[partner]["back"] += 1
-            continue
+        d[partner][dc.INSERITI.name] = d[partner][dc.SCARTATI.name] + d[partner][dc.TOTALE.name]
 
-        d[partner]["discarded"] += 1
+
     return d
 
 
@@ -216,6 +328,7 @@ def retrieveContracts(contract_dict: dict, lista_agenti: list):
         gv.logger.info("processing agent: %s", name)
         name = name.replace("o'", "ò").replace("-", " ")
         name = lnUtils.remove_extra_blanks(data=name)
+        gv.logger.info("    compare name: %s", name)
         d[name] = gv.myDict()
 
         ### -----------------------------
@@ -239,55 +352,6 @@ def retrieveContracts(contract_dict: dict, lista_agenti: list):
 
 
 
-#########################################################
-# per ogni partner crea un riga
-# ritorna list of list
-# nella prima riga mettiamo i totali_agente dei vari partner
-#########################################################
-def calculateAgentResults(agent_data: dict, row: list) -> list:
-    new_rows = []
-    sunto_agente = row[:]
-
-    processati = 0
-    discarded = 0
-    excluded = 0
-    validi = 0
-    confermati = 0
-    attivazione = 0
-    back = 0
-    rid = 0
-
-    for partner_name in agent_data:
-        new_row=row[:]
-        ptr=agent_data[partner_name]
-        data_cols=[partner_name,
-                    ptr["processati"]
-                    ptr["discarded"]
-                    ptr["excluded"]
-                    ptr["totale validi"]
-                    ptr["confermato"]
-                    ptr["attivazione"]
-                    ptr["back"]
-                    ptr["rid"]
-                ]
-        processati  += ptr["processati"]
-        discarded   += ptr["discarded"]
-        excluded    += ptr["excluded"]
-        validi      += ptr["totale validi"]
-        confermati  += ptr["confermato"]
-        attivazione += ptr["attivazione"]
-        back        += ptr["back"]
-        rid         += ptr["rid"]
-
-        new_row.extend(data_cols)
-        new_rows.append(new_row)
-    # sunto_agente.extend(["", validi, confermati, attivazione, back, rid])
-    sunto_agente.extend(["", processati, discarded, excluded, validi, confermati, attivazione, back, rid])
-    new_rows.insert(0, sunto_agente)
-    return new_rows
-
-
-
 
 
 
@@ -302,7 +366,7 @@ def Main(gVars: dict):
 
     sheet_name                 = gv.excel_config.source_sheet.name
     selected_columns           = gv.excel_config.source_sheet.columns_to_be_extracted
-    gv.excel_filename             = Path(gv.args.input_excel_filename).resolve()
+    gv.excel_filename          = Path(gv.args.input_excel_filename).resolve()
     agenti_excel_filename      = Path(gv.args.output_agenti_filename).resolve()
     file_agents_data           = Path(gv.working_files.file_agents_data).resolve()
     file_agents_results        = Path(gv.working_files.file_agents_results).resolve()
@@ -352,11 +416,15 @@ def Main(gVars: dict):
     ### --- in modo che se avanzano segnaliamo l'incongruenza
     ### -------------------------------------
     insertAgentInStruct(main_dict=gv.struttura_aziendale, agents=agents)
+
     if len(agents):
         gv.logger.warning("I seguenti agenti sono presenti nel foglio contratti, na non nella struttura")
         for name in agents.keys():
             gv.logger.warning(" - %s", name)
         dictUtils.toYaml(d=agents, filepath=file_agenti_discrepanti, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+        Sheets.agentiNonTrovati(agents=agents)
+
+
 
 
     ### -------------------------------------
@@ -364,16 +432,12 @@ def Main(gVars: dict):
     ### -------------------------------------
     gv.flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator='#', index=True)
     gv.flatten_keys = list(gv.flatten_data.keys())
-    # for item in gv.flatten_data: gv.logger.debug(item)
+
     gv.keypaths_list = dictUtils.flatten_keypaths_to_list(gv.flatten_keys, separator="#", item_nrs=6)
 
     gv.default_result_cols = commonFunctions.result_columns()
-    import pdb; pdb.set_trace() # by Loreto
-    '''
-    sheetAgent.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
-    managersSheet.createSheet(d=gv.struttura_aziendale, level=gv.COLS.Manager.value, sh_name=gv.COLS.Manager.name)
-    sheetTeamManager.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
-    '''
+
+
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Direttore)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.AreaManager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.ManagerPlus)
