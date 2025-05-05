@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 12.57.53
+# Date .........: 05-05-2025 13.05.33
 #
 
 
@@ -103,7 +103,7 @@ def partnerPerAgente(d_src: dict):
             d[partner]["processati"] = 0
             d[partner]["discarded"] = 0
             d[partner]["excluded"] = 0
-            d[partner]["totale"] = 0
+            d[partner]["totale validi"] = 0
             d[partner]["confermato"] = 0
             d[partner]["attivazione"] = 0
             d[partner]["back"] = 0
@@ -191,7 +191,6 @@ def retrieveAgentData(d_src: dict, nome_agente: str):
     for key, value in d_src.items():
         if value["AGENTE"] == nome_agente:
             contract_id = value.pop("SPEEDY_CTR_ID")
-            # value.pop("AGENTE")
             d[contract_id] = value
 
     return d
@@ -248,22 +247,33 @@ def retrieveContracts(contract_dict: dict, lista_agenti: list):
 def calculateAgentResults(agent_data: dict, row: list) -> list:
     new_rows = []
     sunto_agente = row[:]
-    totali = 0
+
+    processati = 0
+    discarded = 0
+    excluded = 0
+    validi = 0
     confermati = 0
     attivazione = 0
     back = 0
     rid = 0
+
     for partner_name in agent_data:
         new_row=row[:]
         ptr=agent_data[partner_name]
         data_cols=[partner_name,
-                    ptr["totale"],
-                    ptr["confermato"],
-                    ptr["attivazione"],
-                    ptr["back"],
-                    ptr["rid"],
+                    ptr["processati"]
+                    ptr["discarded"]
+                    ptr["excluded"]
+                    ptr["totale validi"]
+                    ptr["confermato"]
+                    ptr["attivazione"]
+                    ptr["back"]
+                    ptr["rid"]
                 ]
-        totali      += ptr["totale"]
+        processati  += ptr["processati"]
+        discarded   += ptr["discarded"]
+        excluded    += ptr["excluded"]
+        validi      += ptr["totale validi"]
         confermati  += ptr["confermato"]
         attivazione += ptr["attivazione"]
         back        += ptr["back"]
@@ -271,7 +281,8 @@ def calculateAgentResults(agent_data: dict, row: list) -> list:
 
         new_row.extend(data_cols)
         new_rows.append(new_row)
-    sunto_agente.extend(["", totali, confermati, attivazione, back, rid])
+    # sunto_agente.extend(["", validi, confermati, attivazione, back, rid])
+    sunto_agente.extend(["", processati, discarded, excluded, validi, confermati, attivazione, back, rid])
     new_rows.insert(0, sunto_agente)
     return new_rows
 
@@ -357,7 +368,7 @@ def Main(gVars: dict):
     gv.keypaths_list = dictUtils.flatten_keypaths_to_list(gv.flatten_keys, separator="#", item_nrs=6)
 
     gv.default_result_cols = commonFunctions.result_columns()
-
+    import pdb; pdb.set_trace() # by Loreto
     '''
     sheetAgent.createSheet(d=gv.struttura_aziendale, calculateAgentResultsCB=calculateAgentResults)
     managersSheet.createSheet(d=gv.struttura_aziendale, level=gv.COLS.Manager.value, sh_name=gv.COLS.Manager.name)
