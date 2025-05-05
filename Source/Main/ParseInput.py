@@ -3,28 +3,12 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 18.05.13
+# Date .........: 26-04-2025 21.25.33
 
 import sys
 import os
 from pathlib import Path
 
-# -----------------------------
-def check_dir(path):
-    p = Path(base_device_db_dir) / path
-    if (p).is_dir():
-        return str(p.resolve())
-    else:
-        print(f"""\n    Input arg ERROR:  {p} doesn't exists.
-            pleas enter on of the following directories
-            under the path: {base_device_db_dir}\n""")
-
-        files=os.listdir(base_device_db_dir)
-        for file in files:
-            if (base_device_db_dir / file).is_dir() and file.startswith("devices_V"):
-                print("     -", file)
-        print()
-        sys.exit(1)
 
 
 ##############################################################

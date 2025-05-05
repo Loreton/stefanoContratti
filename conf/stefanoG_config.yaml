@@ -1,15 +1,66 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 21-04-2025 19.03.16
+# Date .........: 05-05-2025 16.21.06
 
 
 
 
 # system_variables: !include system_variables.lnk.yaml#system_envars
 
+___templates:
+    ___resultStruct: &RESULT_STRUCTURE
+            - Partner
+            - Processati
+            - Excluded
+            - Inseriti
+            - Scartati
+            - Totale
+            - Confermati
+            - In attivazione
+            - Back
+            - RID
+            - VAS
+            - SIM
+            - TV
+            # - xxxx
+
+
+
+
 main:
 
+# StrutturaAziendale_sample:
+#     Direttore:
+#         Area Manager:
+#             Manager Plus:
+#                 Manager:
+#                     Team Manager:
+#                         Agente:
+#                             partner:
+#                               - totale
+#                               - conferma
+#                               - in Attivazione
+#                               - Back
+
+
+
+
+StrutturaAziendale:
+    !include_merge [
+                    "../data/direttore_Cesarino.yaml",
+                    "../data/direttore_Dibilio.yaml",
+                    "../data/direttore_Chiaravallotti.yaml",
+                    "../data/direttore_Guerriero.yaml"
+                    ]
+
+
+working_files:
+    file_agents_data:           "data_output/agents_data.yaml"
+    file_agents_results:        "data_output/agents_results.yaml"
+    file_contratti_preprocess:  "data_output/contratti_preprocess.yaml"
+    file_contratti_dettagliati: "data_output/contratti_dettagliati.yaml"
+    file_agenti_discrepanti:    "data_output/agenti_discrepanti.yaml"
 
 
 excel:
@@ -18,38 +69,79 @@ excel:
     # excel_filename: "${HOME}/lnProfile/devicesDB/DevicesV003/devicesDB.ods"
     # excel_filename: "${HOME}/ext_disk/Filu/Personali/Loreto/Office/Excel/Varie/Oliviero legna2024.xlsx"
     # excel_filename: "/media/loreto/LnDisk_SD_ext4/Filu/GIT-REPO/Python/stefanoGirini/data/export_contratti.xls"
-    sheet:
+
+    # verranno creati tanti fogli con qhete colonne a scalare
+    output_sheet:
+        colonne_gerarchia:
+            - Direttore
+            - Area Manager
+            - Manager Plus
+            - Manager
+            - Team Manager
+            - Agente
+
+        # saranno presenti in tutti i fogli con i dati sommati all'ultimo livello visualizzato nelle colonne precedenti
+        colonne_dati:
+            *RESULT_STRUCTURE
+
+
+    source_sheet:
         name: Contratti
-        valid_columns:
+        columns_to_be_extracted:
             - SPEEDY_CTR_ID
             - AGENTE
             - PARTNER
             - PRODOTTO
             - ESITO
 
-    esiti:
+    # -----------------------------------------------------------
+    # - keywords da verificare all'interno del campo ESITO
+    # - per permettere la catalogazione corretta dei contratti
+    # -----------------------------------------------------------
+    esito_keywords:
         exclude:
             - doppia prenotazione
             - ko < 12 mesi
 
-        totale:
-            include: all
+        # totale:
+        #     include: all
 
         confermato:
-            include:
-                - confermato
+            - confermato
 
         attivazione:
-            include:
-                - attivazione
+            - in attivazione
+
         back:
-            include:
-                - Attesa
-                - Prenotato
-                - Gestito
-                - NonConforme
-                - "In lavorazione"
-                - Accettato
+            - Attesa
+            - Gestito
+            - Non Conforme
+            - Prenotato
+            - lavorazione
+            - Accettato
+
+
+    prodotto_keywords:
+        rid:
+            - rid
+
+        vas:
+            - vas
+
+        sim:
+            - sim
+            - mobile
+
+        tv:
+            - "Tim Vision"
+            - "Tim Gold"
+            - "Tim Disney"
+            - "Tim Calcio"
+            - "Tim Intrattenimento"
+            - "Tim Netflix"
+            - "Tim Mobile"
+
+
 
 
 

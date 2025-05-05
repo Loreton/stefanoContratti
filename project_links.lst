@@ -24,7 +24,8 @@ dest_Dir="Source/lnLib"
     # SQLite/SQLiteDB_Class.py
     # SQLite/SQLiteTable_Class.py
 
-    excel/ln_Excel_Class.py
+    excel/ln_pyexcel_Class.py
+    excel/ln_pandasExcel_Class.py
 
 
 
@@ -38,7 +39,7 @@ dest_Dir="links_conf"
 
 
 
-dest_Dir="just_as_ref"
+# dest_Dir="just_as_ref"
     # ${HOME}/lnProfile/devicesDB/${DB_VERSION_DIR}/source                               "${DB_VERSION_DIR}_source"
 
 

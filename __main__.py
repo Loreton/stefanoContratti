@@ -3,14 +3,14 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 22-04-2025 17.34.00
+# Date .........: 05-05-2025 16.43.51
 
 import sys; sys.dont_write_bytecode=True
 import os
 from benedict import benedict
 from pathlib import Path
-
-
+import pandas as pd
+from enum import Enum
 
 
 
@@ -36,13 +36,32 @@ from    ColoredLogger import setColoredLogger, testLogger
 
 from    ParseInput import ParseInput
 import  prepare_gVars
+import  mainProcess
 import  FileLoader
-# import  loadFromFile
-# import  File_csv
-# import  checkDuplicates
-import  processData
 
-# https://docs.pyexcel.org/en/latest/
+class dataCols(Enum):
+    PROCESSATI     = 0
+    EXCLUDED       = 1
+    INSERITI       = 2
+    SCARTATI       = 3
+    TOTALE         = 4
+    CONFERMATI     = 5
+    ATTIVAZIONE    = 6
+    BACK           = 7
+    RID            = 8
+    VAS            = 9
+    SIM            = 10
+    TV             = 11
+
+class HIERARCHY(Enum):
+    Direttore         = 1
+    AreaManager       = 2
+    ManagerPlus       = 3
+    Manager           = 4
+    TeamManager       = 5
+    Agente            = 6
+
+
 
 
 # -------------------------------
@@ -50,25 +69,20 @@ import  processData
 # -------------------------------
 def readConfig():
     global gv
-    os.environ["DB_NAME"]="devicesDB"
     config_file=f"{prj_name}_config.yaml"
-    gv.exit_on_config_file_not_found=True
 
-    unresolved_fileout=f"{gv.tmp_dir}/unresolved_full_config.yaml"
+    unresolved_fileout=f"{gv.tmp_dir}/full_config.yaml"
     if not (full_config:=FileLoader.loadConfigurationData(config_file=config_file, save_yaml_on_file=unresolved_fileout) ):
         logger.error("Configuration data error")
         sys.exit(1)
 
-    gv.excel_config   = full_config.pop("excel") ### extrai la parte sqlite
-    # import pdb; pdb.set_trace() # by Loreto
-    # gv.sqlite_config  = full_config.pop("sqlite") ### extrai la parte sqlite
-    # gv.main_config    = full_config.pop("main") ### extrai la parte sqlite
-    # gv.openwrt_config = full_config.pop("openwrt") ### extrai la parte sqlite
-
-
-
-
-
+    gv.excel_config         = full_config.pop("excel") ### extrai la parte sqlite
+    gv.struttura_aziendale  = full_config.pop("StrutturaAziendale") ### extrai la parte sqlite
+    gv.working_files        = full_config.pop("working_files") ### extrai la parte sqlite
+    # gv.COLS = COLS
+    gv.HIERARCHY = HIERARCHY
+    gv.dataCols   = dataCols
+    # gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
 
 
 #######################################################
@@ -77,14 +91,13 @@ def readConfig():
 if __name__ == '__main__':
     global gv
 
+
     prj_name = "stefanoG"
-
-
 
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-04-22_173400"
+    __ln_version__=f"{prj_name} version: V2025-05-05_164351"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 
@@ -103,17 +116,23 @@ if __name__ == '__main__':
     logger.warning(__ln_version__)
 
     if not excelFilename.exists():
-        logger.error("file: %s doesn't exists", excelFilename)
-        sys.exit(1)
+        logger.warning("file: %s doesn't exists", excelFilename)
+        #sys.exit(1)
 
     # ----------------------------
     # ----- prepare global project variables
     # ----------------------------
     gv=prepare_gVars.setMainVars(logger=logger, input_args=args, prj_name=prj_name, search_paths=["conf", "links_conf"])
 
+
     readConfig()
 
-    processData.processFile(gVars=gv)
+    # mainProcess.testExcel(gVars=gv)
+    # sys.exit()
+
+
+
+    mainProcess.Main(gVars=gv)
 
     sys.exit()
 

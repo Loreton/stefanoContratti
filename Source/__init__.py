@@ -3,12 +3,16 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 20-04-2025 20.04.06
+# Date .........: 04-05-2025 17.34.58
 
 
 
-import sys
+
+import sys; sys.dont_write_bytecode=True
+import os
 from pathlib import Path
+
+import Source.Main.zipLnLib as ZIP
 
 
 # -------------------------
@@ -17,25 +21,43 @@ from pathlib import Path
 # - anche con il progetto zipped
 # -------------------------
 _my_path=[]
+
 def set_path():
+
+    no_lnlib_zip=False
+    if "--nolnlibzip" in sys.argv:
+        sys.argv.remove("--nolnlibzip")
+        no_lnlib_zip=True
+
+
     script_name=Path(sys.argv[0]).resolve()
 
     if script_name.suffix == '.zip': # sono all'interno dello zip
         _my_path.append(script_name.parent.parent)
         prj_dir=script_name # ... nome dello zip_file
-        # my_path.extend(extractZip(script_name)) # extract lnLib.zip from project.zip file and get its path
+        lnLib_zip = f"{prj_dir}/Source/LnLib.zip"
+        _my_path.extend(ZIP.extractZip(script_name)) # extract lnLib.zip from project.zip file and get its path
     else:
         prj_dir=script_name.parent # nome della prj directory
         _my_path.append(script_name.parent)
 
+        ### creiamo lnLib.zip per avere i moduli aggiornati al momento
+        lnLib_zip = f"{prj_dir}/Source/LnLib.zip"
+        ZIP.zip_dir_with_extensions(source_dir=f'{prj_dir}/Source/lnLib_links', zip_filename=lnLib_zip, extensions=['.py'] )
+        print(lnLib_zip, "has been created")
 
     _my_path.append(prj_dir)
     _my_path.append(f'{prj_dir}/Source')
     _my_path.append(f'{prj_dir}/Source/Main')
-    _my_path.append(f'{prj_dir}/Source/Modules')
+    _my_path.append(f'{prj_dir}/Source/Sheets')
     _my_path.append(f'{prj_dir}/Source/Process')
-    _my_path.append(f'{prj_dir}/Source/lnLib')
-    # _my_path.append(f'{prj_dir}/Source/LnLib.zip')
+    # _my_path.append(f'{prj_dir}/Source/lnLib') ## non dovrebbe servire perché ci appoggiamo alla lnLib.zip
+    if no_lnlib_zip:
+        _my_path.append(f'{prj_dir}/Source/lnLib_links') ## non dovrebbe servire perché ci appoggiamo alla lnLib.zip
+    else:
+        _my_path.append(f'{prj_dir}/Source/LnLib.zip')
+
+
 
     for path in _my_path:
         # print(str(path))

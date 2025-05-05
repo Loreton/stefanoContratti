@@ -2,7 +2,7 @@
 
 #===============================================
 # updated by ...: Loreto Notarantonio
-# Date .........: 20-04-2025 20.05.39
+# Date .........: 04-05-2025 09.18.33
 #===============================================
 
 import sys; sys.dont_write_bytecode=True
@@ -14,6 +14,10 @@ import socket
 from pathlib import Path
 from benedict import benedict
 
+def myDict(use_benedict: bool=True):
+    if use_benedict:
+        return benedict(keyattr_enabled=True, keyattr_dynamic=False)
+    return dict()
 
 def setMainVars(logger, prj_name, input_args, type: str=None, search_paths: list=["conf"]):
     global gv
@@ -44,6 +48,7 @@ def setMainVars(logger, prj_name, input_args, type: str=None, search_paths: list
     gv.run_env              =  "prod" if gv.args.go else "dry_run"
     gv.fExecute             =  gv.args.go
 
+    gv.myDict               = myDict
 
     # - set env variables
     os.environ['DATE_TIME'] = gv.date_time
@@ -54,12 +59,11 @@ def setMainVars(logger, prj_name, input_args, type: str=None, search_paths: list
 
     import FileLoader;       FileLoader.setup(gVars=gv)
     import lnUtils;          lnUtils.setup(gVars=gv)
-    import subprocessLN;     subprocessLN.setup(gVars=gv)
+    # import subprocessLN;     subprocessLN.setup(gVars=gv)
     import dictUtils;        dictUtils.setup(gVars=gv)
-    # import checkDuplicates;  checkDuplicates.setup(gVars=gv)
-    import ln_Excel_Class;   ln_Excel_Class.setup(gVars=gv)
-    # import openwrtUtils;     openwrtUtils.setup(gVars=gv)
-    import processData;     processData.setup(gVars=gv)
+    import mainProcess;      mainProcess.setup(gVars=gv)
+    import ln_pandasExcel_Class;     ln_pandasExcel_Class.setup(gVars=gv)
+
 
 
     return gv
