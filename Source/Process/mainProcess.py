@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 17.48.48
+# Date .........: 05-05-2025 18.18.20
 #
 
 
@@ -12,6 +12,9 @@ from benedict import benedict
 from types import SimpleNamespace
 
 import pandas as pd
+import  openpyxl
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
 
 
 # --- @Loreto: my lib
@@ -21,9 +24,6 @@ import dictUtils
 from ln_pandasExcel_Class import workBbookClass, sheetClass
 
 import commonFunctions
-# import sheetAgent
-# import sheetTeamManager
-# import managersSheet
 import Sheets
 
 
@@ -32,13 +32,6 @@ def setup(gVars: (dict, SimpleNamespace)):
     global gv
     gv=gVars
     gv.logger.caller(__name__)
-    # gv.excelBook=None
-    # gv.tmpPath="/tmp/stefanoGirini"
-    # Path(gv.tmpPath).mkdir(parents=True, exist_ok=True)
-
-    # sheetAgent.setup(gVars=gv)
-    # sheetTeamManager.setup(gVars=gv)
-    # managersSheet.setup(gVars=gv)
     commonFunctions.setup(gVars=gv)
     Sheets.setup(gVars=gv)
 
@@ -137,25 +130,6 @@ def partnerPerAgente(d_src: dict):
 
     #-------------------------------------------------
 
-
-    # esito_keys              = gv.excel_config.esito_keywords
-    # product_keys            = gv.excel_config.prodotto_keywords
-
-    # ----------------------------------------
-    # - valori di include/exclude
-    # ----------------------------------------
-
-    # --- remove blanks inside item's list
-    # esito_exclude       = [v.lower().replace(' ', '_') for v in esito.exclude]
-    # esito_confermato    = [v.lower().replace(' ', '_') for v in esito.confermato]
-    # esito_attivazione   = [v.lower().replace(' ', '_') for v in esito.attivazione]
-    # esito_back          = [v.lower().replace(' ', '_') for v in esito.back]
-
-    # prodotto_rid         = [v.lower().replace(' ', '_') for v in prodotto.rid]
-    # prodotto_vas         = [v.lower().replace(' ', '_') for v in prodotto.vas]
-    # prodotto_sim         = [v.lower().replace(' ', '_') for v in prodotto.sim]
-    # prodotto_tv          = [v.lower().replace(' ', '_') for v in prodotto.tv]
-
     esito_exclude       = [v.lower() for v in gv.excel_config.esito_keywords.exclude]
     esito_confermato    = [v.lower() for v in gv.excel_config.esito_keywords.confermato]
     esito_attivazione   = [v.lower() for v in gv.excel_config.esito_keywords.attivazione]
@@ -175,16 +149,9 @@ def partnerPerAgente(d_src: dict):
 
         ### --- Modifico esoto e prodotto per fare una ricerca affidabile
         prodotto = value["PRODOTTO"].lower()
-        # prodotto = prodotto.replace("tim ", "tim_")
-        if "netflix" in prodotto:
-            # import pdb; pdb.set_trace() # by Loreto
-            xx="TIM"
         prodotto = prodotto.split()
 
         esito    = value["ESITO"].lower()
-        if esito == "confermato" and xx == "TIM":
-            xx="OK"
-        # esito    = esito.replace("non ", "non_")
         esito    = esito.split()
 
         if not partner in d:
@@ -193,18 +160,6 @@ def partnerPerAgente(d_src: dict):
             for item in dc:
                 d[partner][item.name] = 0
 
-            # d[partner]["processati"] = 0
-            # d[partner]["discarded"] = 0
-            # d[partner]["excluded"] = 0
-            # d[partner]["totale"] = 0
-            # d[partner]["confermato"] = 0
-            # d[partner]["attivazione"] = 0
-            # d[partner]["back"] = 0
-            # d[partner]["rid"] = 0
-            # d[partner]["vas"] = 0
-            # d[partner]["sim"] = 0
-            # d[partner]["tv"] = 0
-            # d[partner]["inseriti"] = 0
 
         ptr=d[partner]
         gv.logger.debug("processing esito: %s", esito)
@@ -221,17 +176,14 @@ def partnerPerAgente(d_src: dict):
         if includeData(esito, esito_confermato):
             d[partner][dc.CONFERMATI.name] += 1
             isValid=True
-            # continue
 
         elif includeData(esito, esito_attivazione):
             d[partner][dc.ATTIVAZIONE.name] += 1
             isValid=True
-            # continue
 
         elif includeData(esito, esito_back):
             d[partner][dc.BACK.name] += 1
             isValid=True
-            # continue
 
         if isValid:
             d[partner][dc.TOTALE.name] += 1
@@ -417,6 +369,11 @@ def Main(gVars: dict):
     ### -------------------------------------
     insertAgentInStruct(main_dict=gv.struttura_aziendale, agents=agents)
 
+
+    gv.DF = []
+    gv.SHEETS = []
+    gv.COLOR_CELLS = []
+
     if len(agents):
         gv.logger.warning("I seguenti agenti sono presenti nel foglio contratti, na non nella struttura")
         for name in agents.keys():
@@ -435,8 +392,6 @@ def Main(gVars: dict):
 
     gv.keypaths_list = dictUtils.flatten_keypaths_to_list(gv.flatten_keys, separator="#", item_nrs=6)
 
-    gv.default_result_cols = commonFunctions.result_columns()
-
 
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Direttore)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.AreaManager)
@@ -444,5 +399,25 @@ def Main(gVars: dict):
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Manager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.TeamManager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Agente)
+
+
+    excel_file_path=gv.args.output_agenti_filename
+    excel_file_path=gv.excel_filename
+
+    lnExcel.addSheet(filename=excel_file_path, sheets=gv.SHEETS, dataFrames=gv.DF, sheet_exists="replace", mode='a')
+
+    ### --- aggiustamento col_size e qualche colore
+    wb = openpyxl.load_workbook(excel_file_path)
+
+    for sh_name, cell_range in zip(gv.SHEETS, gv.COLOR_CELLS):
+        ws = wb[sh_name]
+
+        commonFunctions.setColumnSize(ws)
+        commonFunctions.setTitle(ws)
+        if cell_range:
+            commonFunctions.setCellsColor(ws, cells=cell_range, color='ffffa6')
+            ws.freeze_panes = ws['B2'] ## Freeze everything to left of B (that is A) and no columns to feeze
+
+    wb.save(excel_file_path)
 
 

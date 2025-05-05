@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 17.49.29
+# Date .........: 05-05-2025 18.16.01
 #
 
 
@@ -117,11 +117,8 @@ def create(d: dict, hierarchy_level):
             data    = rows_data
         )
 
-    excel_file_path=gv.args.output_agenti_filename
-    excel_file_path=gv.excel_filename
-    # lnExcel.addSheet(filename=gv.args.output_agenti_filename, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
-    lnExcel.addSheet(filename=excel_file_path, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
-
+    gv.DF.append(df)
+    gv.SHEETS.append(sh_name)
 
     ### --- crea il range del Manager e relativi risultati
     cell_range=[]
@@ -129,16 +126,9 @@ def create(d: dict, hierarchy_level):
         row_cells = [(row, col) for row in row_to_be_colored]
         cell_range.extend(row_cells)
 
+    gv.COLOR_CELLS.append(cell_range)
 
-    wb = openpyxl.load_workbook(excel_file_path)
-    ws = wb[sh_name]
 
-    commonFunctions.setColumnSize(ws)
-    commonFunctions.setTitle(ws)
-    commonFunctions.setCellsColor(ws, cells=cell_range, color='ffffa6')
-
-    ws.freeze_panes = ws['B2'] ## Freeze everything to left of B (that is A) and no columns to feeze
-    wb.save(excel_file_path)
 
 
 
@@ -158,13 +148,7 @@ def agentiNonTrovati(agents: list):
             data    = rows_data
         )
 
-    excel_file_path=gv.args.output_agenti_filename
-    excel_file_path=gv.excel_filename
-    # lnExcel.addSheet(filename=gv.args.output_agenti_filename, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
-    lnExcel.addSheet(filename=excel_file_path, sheets=[sh_name], dataFrames=[df], sheet_exists="replace", mode='a')
 
-    wb = openpyxl.load_workbook(excel_file_path)
-    ws = wb[sh_name]
-    commonFunctions.setColumnSize(ws)
-    ws.freeze_panes = ws['B2'] ## Freeze everything to left of B (that is A) and no columns to feeze
-    wb.save(excel_file_path)
+    gv.DF.append(df)
+    gv.SHEETS.append(sh_name)
+    gv.COLOR_CELLS.append(None)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 17.44.54
+# Date .........: 05-05-2025 18.16.48
 #
 
 
@@ -40,7 +40,6 @@ def prepareTitleRow(index: int):
     # --- @Loreto: prepariamo il titolo
     title_row = gv.colonne_gerarchia[:index]
     title_row.append("Partner")
-    # for col_name in gv.colonne_dati:
     for col in gv.dataCols:
         title_row.append(col.name)
     return title_row
@@ -50,10 +49,8 @@ def prepareTitleRow(index: int):
 def result_columns():
     # --- aggiungiamo le colonne contenenti i risultati di default (=0)
     default_result_cols = []
-    # for col_name in gv.colonne_dati:
     for col in gv.dataCols:
         default_result_cols.append(0) ### - Valore di default
-    # default_result_cols[0] = "" ### replace with blank value
     return default_result_cols
 
 
@@ -72,20 +69,7 @@ def setColumnSize(ws):
     from openpyxl.utils import get_column_letter
     for idx, col in enumerate(ws.columns, 1):
         ws.column_dimensions[get_column_letter(idx)].auto_size = True
-    return
 
-    # for col in ws.columns:
-    #     max_length = 0
-    #     column = col[0].column_letter  # Get the column name (e.g., 'A')
-    #     for cell in col:
-    #         try:
-    #             if cell.value:
-    #                 max_length = max(max_length, len(str(cell.value)))
-    #         except:
-    #             pass
-    #     adjusted_width = (max_length + 2)
-    #     ws.column_dimensions[column].width = adjusted_width
-    #     gv.logger.notify("setting %s col_width to: %s", column, adjusted_width)
 
 
 
@@ -109,19 +93,9 @@ def partnerData(agent_data: dict, partner_column: dict, somma: list):
     dc = gv.dataCols
     for partner, data in agent_data.items():
         if not partner in partner_column:
-            partner_column[partner] = gv.default_result_cols[:] ## skip partner name
-            # partner_col_data[partner][0] = partner
+            partner_column[partner] = result_columns() ## skip partner name
 
         ptr = partner_column[partner]
-        # import pdb; pdb.set_trace() # by Loreto
-        # ptr[0] += data["processati"]
-        # ptr[1] += data["discarded"]
-        # ptr[2] += data["excluded"]
-        # ptr[3] += data["totale"]
-        # ptr[4] += data["confermato"]
-        # ptr[5] += data["attivazione"]
-        # ptr[6] += data["back"]
-        # ptr[7] += data["rid"]
 
         ptr[0] += data[dc.PROCESSATI.name]
         ptr[1] += data[dc.EXCLUDED.name]
@@ -152,17 +126,6 @@ def partnerData(agent_data: dict, partner_column: dict, somma: list):
         somma[10] += data[dc.SIM.name]
         somma[11] += data[dc.TV.name]
 
-
-
-
-        # somma[0] += data["processati"]
-        # somma[1] += data["discarded"]
-        # somma[2] += data["excluded"]
-        # somma[3] += data["totale"]
-        # somma[4] += data["confermato"]
-        # somma[5] += data["attivazione"]
-        # somma[6] += data["back"]
-        # somma[7] += data["rid"]
 
 
 
