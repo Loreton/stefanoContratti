@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 18.16.48
+# Date .........: 05-05-2025 18.25.17
 #
 
 
@@ -125,10 +125,6 @@ def partnerData(agent_data: dict, partner_column: dict, somma: list):
         somma[9] += data[dc.VAS.name]
         somma[10] += data[dc.SIM.name]
         somma[11] += data[dc.TV.name]
-
-
-
-
 
 
 
