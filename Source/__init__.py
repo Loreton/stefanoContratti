@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 04-05-2025 17.34.58
+# Date .........: 06-05-2025 12.57.17
 
 
 
@@ -48,8 +48,8 @@ def set_path():
 
     _my_path.append(prj_dir)
     _my_path.append(f'{prj_dir}/Source')
+    _my_path.append(f'{prj_dir}/Source/Prepare')
     _my_path.append(f'{prj_dir}/Source/Main')
-    _my_path.append(f'{prj_dir}/Source/Sheets')
     _my_path.append(f'{prj_dir}/Source/Process')
     # _my_path.append(f'{prj_dir}/Source/lnLib') ## non dovrebbe servire perché ci appoggiamo alla lnLib.zip
     if no_lnlib_zip:
