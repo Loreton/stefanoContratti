@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 06-05-2025 16.30.52
+# Date .........: 06-05-2025 17.43.20
 #
 
 
@@ -18,7 +18,7 @@ from openpyxl.styles import PatternFill
 
 
 # --- @Loreto: my lib
-import lnPyExcel_Class as lnExcel
+import  lnPyExcel_Class as lnExcel
 import lnUtils
 import dictUtils
 from ln_pandasExcel_Class import workBbookClass, sheetClass
@@ -291,22 +291,19 @@ def Main(gVars: dict):
 
 
 
-    import pdb; pdb.set_trace() # by Loreto
     ### -------------------------------
     ### --- read contracts data
     ### -------------------------------
-    gv.workBook  = workBbookClass(excel_filename=gv.excel_filename, logger=gv.logger)
-    sh_contratti = sheetClass(wbClass=gv.workBook, sheet_name_nr=0)
-    dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
+    gv.workBook  = lnExcel.WorkbookClass(excel_filename=gv.excel_filename, logger=gv.logger)
+    sh_contratti = gv.workBook.getSheetClass(sheet_name_nr=0)
+    dict_contratti = sh_contratti.asDict(usecols=selected_columns)
     dictUtils.toYaml(d=dict_contratti, filepath=file_contratti_preprocess, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-    gv.workBook.close()
-    # import pdb; pdb.set_trace() # by Loreto
 
 
     ### -------------------------------------
     ### --- estrazione dati agenti dal foglio contratti
     ### -------------------------------------
-    nomi_agenti = sh_contratti.readColumn(col_name="AGENTE", unique=True)
+    nomi_agenti = sh_contratti.readColumn(col_name="AGENTE", unique=True, header=False)
     gv.logger.info("nomi agenti: %s", nomi_agenti)
 
 
@@ -359,7 +356,7 @@ def Main(gVars: dict):
 
     gv.keypaths_list = dictUtils.flatten_keypaths_to_list(gv.flatten_keys, separator="#", item_nrs=6)
 
-
+    import pdb; pdb.set_trace() # by Loreto
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Direttore)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.AreaManager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.ManagerPlus)

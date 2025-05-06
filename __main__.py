@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 06-05-2025 16.23.53
+# Date .........: 06-05-2025 16.37.15
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -69,6 +69,7 @@ class HIERARCHY(Enum):
 # -------------------------------
 def readConfig():
     global gv
+    gv.exit_on_config_file_not_found = True
     config_file=f"{prj_name}_config.yaml"
 
     unresolved_fileout=f"{gv.tmp_dir}/full_config.yaml"
@@ -97,7 +98,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-05-06_162353"
+    __ln_version__=f"{prj_name} version: V2025-05-06_163715"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.input_excel_filename))
 
