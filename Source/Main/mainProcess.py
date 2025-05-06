@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 06-05-2025 17.43.20
+# Date .........: 06-05-2025 17.48.00
 #
 
 
@@ -303,7 +303,7 @@ def Main(gVars: dict):
     ### -------------------------------------
     ### --- estrazione dati agenti dal foglio contratti
     ### -------------------------------------
-    nomi_agenti = sh_contratti.readColumn(col_name="AGENTE", unique=True, header=False)
+    nomi_agenti = sh_contratti.getColumn(col_name="AGENTE", unique=True, header=False)
     gv.logger.info("nomi agenti: %s", nomi_agenti)
 
 
