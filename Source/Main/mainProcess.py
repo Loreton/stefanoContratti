@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 18.18.20
+# Date .........: 06-05-2025 13.24.02
 #
 
 
@@ -48,49 +48,12 @@ def setup(gVars: (dict, SimpleNamespace)):
 ################################################################
 def partnerPerAgente(d_src: dict):
     #-------------------------------------------------
-    def includeData_(word: str, include_list: list):
-        fConfirmed = False
-        for include_value in include_list:
-            if include_value in word:
-                fConfirmed = True
-                break
 
-        return fConfirmed
-
-
-    def excludeData_(word: str, exclude_list: list):
-        fExcluded = False
-        for excl_value in exclude_list:
-            if excl_value in word:
-                gv.logger.debug("excluding due to: %s", excl_value)
-                fExcluded = True
-                break
-
-        return fExcluded
-
-
-
-    def includeData_(source_list: list, search_list: list):
-        fConfirmed = False
-        common_items = [item for item in search_list if item in source_list]
-        if common_items:
-            fConfirmed = True
-        return fConfirmed
-
-
-    def excludeData_(source_list: list, search_list: list):
-        fExcluded = False
-        common_items = [item for item in search_list if item in source_list]
-        if common_items:
-            fConfirmed = True
-        return fExcluded
-
-
-###################################################################
-# compara un lista con un'altra.
-# Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
-# ...e si fa la comparazione con tutte le parole in AND
-###################################################################
+    #-----------------------------------------------------------------
+    # compara un lista con un'altra.
+    # Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
+    # ...e si fa la comparazione con tutte le parole in AND
+    #-----------------------------------------------------------------
     def includeData(source_list: list, search_list: list):
         fConfirmed = False
         for include_value in search_list:
@@ -107,11 +70,11 @@ def partnerPerAgente(d_src: dict):
 
         return fConfirmed
 
-###################################################################
-# compara un lista con un'altra.
-# Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
-# ...e si fa la comparazione con tutte le parole in AND
-###################################################################
+    #-----------------------------------------------------------------
+    # compara un lista con un'altra.
+    # Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
+    # ...e si fa la comparazione con tutte le parole in AND
+    #-----------------------------------------------------------------
     def excludeData(source_list: list, search_list: list):
         fExcluded = False
         for exclude_value in search_list:
@@ -130,15 +93,15 @@ def partnerPerAgente(d_src: dict):
 
     #-------------------------------------------------
 
-    esito_exclude       = [v.lower() for v in gv.excel_config.esito_keywords.exclude]
-    esito_confermato    = [v.lower() for v in gv.excel_config.esito_keywords.confermato]
-    esito_attivazione   = [v.lower() for v in gv.excel_config.esito_keywords.attivazione]
-    esito_back          = [v.lower() for v in gv.excel_config.esito_keywords.back]
+    esito_exclude     = [v.lower() for v in gv.excel_config.esito_keywords.exclude]
+    esito_confermato  = [v.lower() for v in gv.excel_config.esito_keywords.confermato]
+    esito_attivazione = [v.lower() for v in gv.excel_config.esito_keywords.attivazione]
+    esito_back        = [v.lower() for v in gv.excel_config.esito_keywords.back]
 
-    prodotto_rid         = [v.lower() for v in gv.excel_config.prodotto_keywords.rid]
-    prodotto_vas         = [v.lower() for v in gv.excel_config.prodotto_keywords.vas]
-    prodotto_sim         = [v.lower() for v in gv.excel_config.prodotto_keywords.sim]
-    prodotto_tv          = [v.lower() for v in gv.excel_config.prodotto_keywords.tv]
+    prodotto_rid      = [v.lower() for v in gv.excel_config.prodotto_keywords.rid]
+    prodotto_vas      = [v.lower() for v in gv.excel_config.prodotto_keywords.vas]
+    prodotto_sim      = [v.lower() for v in gv.excel_config.prodotto_keywords.sim]
+    prodotto_tv       = [v.lower() for v in gv.excel_config.prodotto_keywords.tv]
 
     d = gv.myDict()
     dc=gv.dataCols
@@ -187,6 +150,7 @@ def partnerPerAgente(d_src: dict):
 
         if isValid:
             d[partner][dc.TOTALE.name] += 1
+
             ### --- verifichiamo i prodotti
             if includeData(prodotto, prodotto_rid):
                 d[partner][dc.RID.name] += 1
