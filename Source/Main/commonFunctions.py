@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 18.25.17
+# Date .........: 07-05-2025 18.25.06
 #
 
 
 import sys; sys.dont_write_bytecode = True
 import os
 from pathlib import Path
-from benedict import benedict
+# from benedict import benedict
 from types import SimpleNamespace
 from enum import Enum
-import pandas as pd
+# import pandas as pd
 
-import  openpyxl
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill
+# import  openpyxl
+# from openpyxl import load_workbook
+# from openpyxl.styles import PatternFill
 
 # --- @Loreto: my lib
-import ln_pandasExcel_Class as lnExcel
-import lnUtils
-import dictUtils
-from ln_pandasExcel_Class import workBbookClass, sheetClass
+# import ln_pandasExcel_Class as lnExcel
+# import lnUtils
+# import dictUtils
+# from ln_pandasExcel_Class import workBbookClass, sheetClass
 
 
 
@@ -55,20 +55,20 @@ def result_columns():
 
 
 
-def setTitle(ws):
-    gray = 'b2b2b2'
-    # formatting the header columns, filling red color
-    for col in range(1, ws.max_column + 1):
-       cell_header = ws.cell(1, col)
-       cell_header.fill = PatternFill(start_color=gray, end_color=gray, fill_type="solid") #used hex code for red color
+# def setTitle(ws):
+#     gray = 'b2b2b2'
+#     # formatting the header columns, filling red color
+#     for col in range(1, ws.max_column + 1):
+#        cell_header = ws.cell(1, col)
+#        cell_header.fill = PatternFill(start_color=gray, end_color=gray, fill_type="solid") #used hex code for red color
 
 
 # Auto-adjust Excel column widths
-def setColumnSize(ws):
+# def setColumnSize(ws):
 
-    from openpyxl.utils import get_column_letter
-    for idx, col in enumerate(ws.columns, 1):
-        ws.column_dimensions[get_column_letter(idx)].auto_size = True
+#     from openpyxl.utils import get_column_letter
+#     for idx, col in enumerate(ws.columns, 1):
+#         ws.column_dimensions[get_column_letter(idx)].auto_size = True
 
 
 
@@ -76,13 +76,13 @@ def setColumnSize(ws):
 ############################################################
 # cell_range = [ (row1, col1), (row2, col2), ...]
 ############################################################
-def setCellsColor(ws, cells: list, color='ffffa6'):
-    # light_yellow_3 = 'ffffa6'
-    # my_color = light_yellow_3
+# def setCellsColor(ws, cells: list, color='ffffa6'):
+#     # light_yellow_3 = 'ffffa6'
+#     # my_color = light_yellow_3
 
-    for row, col in cells:
-        curr_cell = ws.cell(row, col)
-        curr_cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid") #used hex code for red color
+#     for row, col in cells:
+#         curr_cell = ws.cell(row, col)
+#         curr_cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid") #used hex code for red color
 
 
 

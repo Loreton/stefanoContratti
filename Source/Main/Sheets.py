@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 07-05-2025 17.28.36
+# Date .........: 07-05-2025 18.26.14
 #
 
 
@@ -11,19 +11,19 @@ from pathlib import Path
 from benedict import benedict
 from types import SimpleNamespace
 from enum import Enum
-import pandas as pd
+# import pandas as pd
 
-import  openpyxl
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill
-from pprint import pprint as pp
+# import  openpyxl
+# from openpyxl import load_workbook
+# from openpyxl.styles import PatternFill
+# from pprint import pprint as pp
 
 self=sys.modules[__name__]
 
-import ln_pandasExcel_Class as lnExcel
+# import ln_pandasExcel_Class as lnExcel
 import lnUtils
 import dictUtils
-from ln_pandasExcel_Class import workBbookClass, sheetClass
+# from ln_pandasExcel_Class import workBbookClass, sheetClass
 import commonFunctions
 
 
