@@ -24,8 +24,9 @@ dest_Dir="Source/lnLib_links"
     # SQLite/SQLiteDB_Class.py
     # SQLite/SQLiteTable_Class.py
 
+    # excel/ln_pandasExcel_Class.py
     excel/lnPyExcel_Class.py
-    excel/ln_pandasExcel_Class.py
+    excel/lnOpenPyXL_Class.py
 
 
 

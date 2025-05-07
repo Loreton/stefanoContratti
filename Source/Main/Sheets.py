@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 18.16.01
+# Date .........: 07-05-2025 17.28.36
 #
 
 
@@ -109,46 +109,36 @@ def create(d: dict, hierarchy_level):
 
     # --- @Loreto:  eliminiamo le celle che hanno valore == cella superire
     rows_data = dictUtils.compact_list(data=sheet_rows, max_items=level, replace_str='-')
+    gv.peWorkBook.addSheet(sheet_name=sh_name, col_names=title_row, data_rows=rows_data, replace=True)
 
-    ### - creiamo il dataFrame
-    df = pd.DataFrame(
-            # columns = colonne_gerarchia[:inx+1],
-            columns = title_row,
-            data    = rows_data
-        )
 
-    gv.DF.append(df)
-    gv.SHEETS.append(sh_name)
 
-    ### --- crea il range del Manager e relativi risultati
+    ### --- crea il range di celle da colorare
     cell_range=[]
     for col in range(level, len(title_row)+1):
         row_cells = [(row, col) for row in row_to_be_colored]
         cell_range.extend(row_cells)
 
     gv.COLOR_CELLS.append(cell_range)
+    gv.SHEETS.append(sh_name)
 
 
 
 
 
-
+#######################################################################
+#
+#######################################################################
 def agentiNonTrovati(agents: list):
     ### - creiamo il dataFrame
-
-    sh_name = "Agents NOT found"
-    title_row = ["Agenti NON trovati"]
+    sh_name = "Agents_NOT_found"
+    title_row = ["Agents_not_found"]
     rows_data = []
     for agent_name in list(agents.keys()):
-        rows_data.append(agent_name)
+        rows_data.append([agent_name])
 
-    df = pd.DataFrame(
-            # columns = colonne_gerarchia[:inx+1],
-            columns = title_row,
-            data    = rows_data
-        )
+    gv.peWorkBook.addSheet(sheet_name=sh_name, col_names=title_row, data_rows=rows_data, replace=True)
 
-
-    gv.DF.append(df)
+    # gv.DF.append(df)
     gv.SHEETS.append(sh_name)
     gv.COLOR_CELLS.append(None)

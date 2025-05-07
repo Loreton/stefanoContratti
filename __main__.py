@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 06-05-2025 16.37.15
+# Date .........: 07-05-2025 08.49.43
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -98,9 +98,9 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-05-06_163715"
+    __ln_version__=f"{prj_name} version: V2025-05-07_084943"
     args=ParseInput(__ln_version__)
-    excelFilename = Path(os.path.expandvars(args.input_excel_filename))
+    excelFilename = Path(os.path.expandvars(args.excel_input_filename))
 
     logger=setColoredLogger(logger_name=prj_name,
                             console_logger_level=args.log_console_level,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 06-05-2025 17.48.00
+# Date .........: 07-05-2025 18.01.11
 #
 
 
@@ -18,10 +18,11 @@ from openpyxl.styles import PatternFill
 
 
 # --- @Loreto: my lib
-import  lnPyExcel_Class as lnExcel
+import lnPyExcel_Class as pe
+import lnOpenPyXL_Class as pyxl
 import lnUtils
 import dictUtils
-from ln_pandasExcel_Class import workBbookClass, sheetClass
+# from ln_pandasExcel_Class import workBbookClass, sheetClass
 
 import commonFunctions
 import Sheets
@@ -282,8 +283,8 @@ def Main(gVars: dict):
 
     sheet_name                 = gv.excel_config.source_sheet.name
     selected_columns           = gv.excel_config.source_sheet.columns_to_be_extracted
-    gv.excel_filename          = Path(gv.args.input_excel_filename).resolve()
-    agenti_excel_filename      = Path(gv.args.output_agenti_filename).resolve()
+    excel_input_filename       = Path(gv.args.excel_input_filename).resolve()
+    excel_output_filename      = Path(gv.args.excel_output_filename).resolve()
     file_agents_data           = Path(gv.working_files.file_agents_data).resolve()
     file_agents_results        = Path(gv.working_files.file_agents_results).resolve()
     file_contratti_preprocess  = Path(gv.working_files.file_contratti_preprocess).resolve()
@@ -294,8 +295,8 @@ def Main(gVars: dict):
     ### -------------------------------
     ### --- read contracts data
     ### -------------------------------
-    gv.workBook  = lnExcel.WorkbookClass(excel_filename=gv.excel_filename, logger=gv.logger)
-    sh_contratti = gv.workBook.getSheetClass(sheet_name_nr=0)
+    gv.peWorkBook  = pe.WorkbookClass(excel_filename=excel_input_filename, logger=gv.logger)
+    sh_contratti = gv.peWorkBook.getSheetClass(sheet_name_nr=0)
     dict_contratti = sh_contratti.asDict(usecols=selected_columns)
     dictUtils.toYaml(d=dict_contratti, filepath=file_contratti_preprocess, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
@@ -334,7 +335,7 @@ def Main(gVars: dict):
     insertAgentInStruct(main_dict=gv.struttura_aziendale, agents=agents)
 
 
-    gv.DF = []
+    # gv.DF = []
     gv.SHEETS = []
     gv.COLOR_CELLS = []
 
@@ -356,7 +357,7 @@ def Main(gVars: dict):
 
     gv.keypaths_list = dictUtils.flatten_keypaths_to_list(gv.flatten_keys, separator="#", item_nrs=6)
 
-    import pdb; pdb.set_trace() # by Loreto
+
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Direttore)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.AreaManager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.ManagerPlus)
@@ -364,24 +365,21 @@ def Main(gVars: dict):
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.TeamManager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Agente)
 
+    gv.peWorkBook.save(filename=excel_output_filename)
 
-    excel_file_path=gv.args.output_agenti_filename
-    excel_file_path=gv.excel_filename
 
-    lnExcel.addSheet(filename=excel_file_path, sheets=gv.SHEETS, dataFrames=gv.DF, sheet_exists="replace", mode='a')
+
 
     ### --- aggiustamento col_size e qualche colore
-    wb = openpyxl.load_workbook(excel_file_path)
-
+    pyxlWB = pyxl.WorkBookClass(filename=excel_output_filename, logger=gv.logger)
     for sh_name, cell_range in zip(gv.SHEETS, gv.COLOR_CELLS):
-        ws = wb[sh_name]
-
-        commonFunctions.setColumnSize(ws)
-        commonFunctions.setTitle(ws)
+        ws = pyxlWB.getSheet(sh_name)
+        ws.formattingHeader()
+        ws.setColumnCalulatedSize(offset=4)
         if cell_range:
-            commonFunctions.setCellsColor(ws, cells=cell_range, color='ffffa6')
-            ws.freeze_panes = ws['B2'] ## Freeze everything to left of B (that is A) and no columns to feeze
+            ws.setCellsColor(cells=cell_range, color='ffffa6')
+            ws.setFreezePanes(cell="B2")
 
-    wb.save(excel_file_path)
+    pyxlWB.save()
 
 
