@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 07-05-2025 18.26.14
+# Date .........: 19-05-2025 17.00.40
 #
 
 
@@ -18,7 +18,7 @@ from enum import Enum
 # from openpyxl.styles import PatternFill
 # from pprint import pprint as pp
 
-self=sys.modules[__name__]
+this=sys.modules[__name__]
 
 # import ln_pandasExcel_Class as lnExcel
 import lnUtils
@@ -33,6 +33,21 @@ def setup(gVars: (dict, SimpleNamespace)):
     gv.logger.caller(__name__)
 
 
+
+
+
+
+#################################################################
+#
+#################################################################
+def processAgentList(agent_list: list, partner_column: dict, somma: list):
+    for agent_name in agent_list:
+        gv.logger.info("    agent: %s", agent_name)
+        if agent_data:=gv.agent_results.get(agent_name): # se presente....
+            commonFunctions.partnerData(agent_data=agent_data, partner_column=partner_column, somma=somma)
+        else:
+            pass
+            # import pdb; pdb.set_trace() # by Loreto
 
 
 
@@ -71,7 +86,7 @@ def create(d: dict, hierarchy_level):
 
     for index in range(len(hier_keypaths)):
         partner_col_data = gv.myDict()
-        # tm_somma=gv.default_result_cols[:] ### conterrà la somma dei vari partner
+
         tm_somma=commonFunctions.result_columns() ### conterrà la somma dei vari partner
 
         this_level_kp=hier_keypaths[index] ## riga corrente
@@ -86,8 +101,8 @@ def create(d: dict, hierarchy_level):
                 agent_list = dictUtils.get_keys_at_level(d_data, target_level=target_level, current_level=0)
                 gv.logger.info("analysing data for Agents: %s:", agent_list)
 
-                ### --- aggiunge tutte le rige dei  partner sommati per i relativi agenti
-                commonFunctions.processAgentList(agent_list=agent_list, partner_column=partner_col_data, somma=tm_somma)
+                ### --- aggiunge tutte le rige dei partner sommati per i relativi agenti
+                this.processAgentList(agent_list=agent_list, partner_column=partner_col_data, somma=tm_somma)
 
             new_row = this_level_kp[:]
 
@@ -99,13 +114,14 @@ def create(d: dict, hierarchy_level):
 
             if partner_col_data:
                 for partner, data in partner_col_data.items():
-                    gv.logger.notify("    agent data has been found")
+                    gv.logger.debug("    agent data has been found")
                     new_row = this_level_kp[:]
                     new_row.append(partner)
                     new_row.extend(data)
                     sheet_rows.append(new_row)
             else:
-                gv.logger.warning("    NO agent data found")
+                gv.logger.debug("NO agent data found")
+
 
     # --- @Loreto:  eliminiamo le celle che hanno valore == cella superire
     rows_data = dictUtils.compact_list(data=sheet_rows, max_items=level, replace_str='-')
@@ -131,8 +147,8 @@ def create(d: dict, hierarchy_level):
 #######################################################################
 def agentiNonTrovati(agents: list):
     ### - creiamo il dataFrame
-    sh_name = "Agents_NOT_found"
-    title_row = ["Agents_not_found"]
+    sh_name = "Unsresolved_Agents"
+    title_row = ["Agents_not_present_in_Structure"]
     rows_data = []
     for agent_name in list(agents.keys()):
         rows_data.append([agent_name])

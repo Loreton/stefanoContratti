@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 07-05-2025 18.01.11
+# Date .........: 19-05-2025 20.20.16
 #
 
 
@@ -178,31 +178,57 @@ def partnerPerAgente(d_src: dict):
 
 
 ###########################################################################
-#
+# Per ogni agente presente nella struttura gerarchinca
+#   andiamo a prelevare i relativi rsultati dai contratti
+# Ho notato che alcuni nomi sono presenti
 ###########################################################################
-def insertAgentInStruct(main_dict: dict, agents: dict):
-    # print(agents.keys())
+def insertAgentInStruct(main_dict: dict, agent_contracts: dict):
+    from itertools import permutations
+    ## --- per comodità salviamo la list degli agenti usato nella subfunction
+    # agenti_in_contratto = [x.lower() for x in agent_contracts.keys()]
+    agenti_in_contratto = [x for x in agent_contracts.keys()]
+
+    #--------------------------------------------------
+    def agentInContract(ag: str):
+        # ag = ag.lower()
+        # print(len(lista))
+        # lista=["Franco Cosimino", "Giuliano Yabandeh Jahromi", "Luigi Amato Euroma2 Pm"]
+        if ag in agenti_in_contratto:
+            return True
+
+        tk = ag.split()
+        combinazioni = list(permutations(tk, len(tk)))
+        for item in combinazioni:
+            name=' '.join(item)
+            print(f"checking {name}  --- {ag}")
+            if name in agenti_in_contratto:
+                print("name modified: ", name)
+                return True
+        else:
+            print(ag)
+            import pdb; pdb.set_trace() # by Loreto
+
+        return False
+
+    #--------------------------------------------------
+
     file_contratti_dettagliati = gv.working_files.file_contratti_dettagliati
     separator = '.'
     key_paths = main_dict.keypaths(gv.struttura_aziendale)
 
-    fLoreto = True
-    fBenedict = not fLoreto
 
-    if fLoreto:
-        flatten_data = dictUtils.lnFlatten(main_dict, separator=separator, index=False)
-        agent_col=5
-        for item in flatten_data:
-            keypath = item.split(separator)
-            if len(keypath) >= agent_col:  ### colonna Agent
-                agent_name = keypath[-1]
-                if agent_name in agents.keys():
-                    gv.logger.info("adding %s results data", agent_name)
-                    this_agent = agents.pop(agent_name)
-                    agent_results=this_agent["results"]
-                    if isinstance(agent_results, dict):
-                        main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
-
+    flatten_data = dictUtils.lnFlatten(main_dict, separator=separator, index=False)
+    agent_col=5
+    for item in flatten_data:
+        keypath = item.split(separator)
+        if len(keypath) >= agent_col:  ### colonna Agent
+            agent_name = keypath[-1]
+            if agent_name in agent_contracts.keys():
+                gv.logger.info("adding %s results data", agent_name)
+                this_agent = agent_contracts.pop(agent_name)
+                agent_results=this_agent["results"]
+                if isinstance(agent_results, dict):
+                    main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
 
     dictUtils.toYaml(d=main_dict, filepath=file_contratti_dettagliati, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
@@ -228,6 +254,10 @@ def retrieveAgentData(d_src: dict, nome_agente: str):
 
 ### ##########################################################
 ### --- processiamo i contratti per ogni agente
+### provvediamo anche ad aggiustare il nome:
+###     -. eliminando extra BLANKs
+###     -. convertendo "o'" in "ò"
+###
 ### crea una struct:
 ###     agent_name:
 ###         partner1:
@@ -238,14 +268,14 @@ def retrieveAgentData(d_src: dict, nome_agente: str):
 ###         partner2:
 ###             ...:
 ### ##########################################################
-def retrieveContracts(contract_dict: dict, lista_agenti: list):
+def retrieveContractsForAgent(contract_dict: dict, lista_agenti: list):
     fDEBUG_SAVE_TO_YAML = False
     d = gv.myDict()
     for name in lista_agenti:
         gv.logger.info("processing agent: %s", name)
         name = name.replace("o'", "ò").replace("-", " ")
         name = lnUtils.remove_extra_blanks(data=name)
-        gv.logger.info("    compare name: %s", name)
+        gv.logger.info("    modified name: %s", name)
         d[name] = gv.myDict()
 
         ### -----------------------------
@@ -277,7 +307,7 @@ def retrieveContracts(contract_dict: dict, lista_agenti: list):
 ################################################################
 def Main(gVars: dict):
     gv.colonne_gerarchia   = gv.excel_config.output_sheet.colonne_gerarchia
-    gv.colonne_dati        = gv.excel_config.output_sheet.colonne_dati
+    # gv.colonne_dati        = gv.excel_config.output_sheet.colonne_dati
 
 
 
@@ -311,40 +341,41 @@ def Main(gVars: dict):
     ### -------------------------------------
     ### --- processiamo i contratti per ogni agente
     ### -------------------------------------
-    agents = retrieveContracts(contract_dict=dict_contratti, lista_agenti=nomi_agenti )
+    agent_contracts = retrieveContractsForAgent(contract_dict=dict_contratti, lista_agenti=nomi_agenti )
 
     ### -------------------------------------
     ### --- creazione due dict (che salviamo su yaml file)
     ### --- per eventuale verifica di un corretto calcolo
-    ### --- gv.agents_results sarà utile per il calcolo ai livelli superiori.
+    ### --- d_data              con i dati deti prelevati dai contratti
+    ### --- gv.agents_results   con i risultati dei dati processati
     ### -------------------------------------
     d_data = gv.myDict()
     gv.agent_results = gv.myDict()
-    for name in agents:
-        d_data[name]=agents[name]["data"]
-        gv.agent_results[name]=agents[name]["results"]
+    for name in agent_contracts:
+        d_data[name]=agent_contracts[name]["data"]
+        gv.agent_results[name]=agent_contracts[name]["results"]
 
     dictUtils.toYaml(d=d_data, filepath=file_agents_data, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
     dictUtils.toYaml(d=gv.agent_results, filepath=file_agents_results, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
     ### -------------------------------------
     ### --- inseriamo gli agenti nella struttura globale
-    ### --- gli agenti inseriti verranno rimossi dagli agenti trovati
-    ### --- in modo che se avanzano segnaliamo l'incongruenza
+    ### --- gli agenti inseriti verranno rimossi dagli agent_contracts
+    ### --- tutti quelli trovati nei contratti ma non presenti in struttura andranno in uno sheet dedicato
     ### -------------------------------------
-    insertAgentInStruct(main_dict=gv.struttura_aziendale, agents=agents)
+    insertAgentInStruct(main_dict=gv.struttura_aziendale, agent_contracts=agent_contracts)
 
 
     # gv.DF = []
     gv.SHEETS = []
     gv.COLOR_CELLS = []
 
-    if len(agents):
+    if len(agent_contracts):
         gv.logger.warning("I seguenti agenti sono presenti nel foglio contratti, na non nella struttura")
-        for name in agents.keys():
+        for name in agent_contracts.keys():
             gv.logger.warning(" - %s", name)
-        dictUtils.toYaml(d=agents, filepath=file_agenti_discrepanti, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-        Sheets.agentiNonTrovati(agents=agents)
+        dictUtils.toYaml(d=agent_contracts, filepath=file_agenti_discrepanti, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+        Sheets.agentiNonTrovati(agents=agent_contracts)
 
 
 
@@ -379,6 +410,9 @@ def Main(gVars: dict):
         if cell_range:
             ws.setCellsColor(cells=cell_range, color='ffffa6')
             ws.setFreezePanes(cell="B2")
+
+        ws.setColumnPercent(row_range=range(2, ws.getRows()), col_name=gv.dataCols.RID_percent.name)
+        ws.setColumnPercent(row_range=range(2, ws.getRows()), col_name=gv.dataCols.VAS_percent.name)
 
     pyxlWB.save()
 

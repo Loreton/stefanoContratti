@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 07-05-2025 08.49.43
+# Date .........: 19-05-2025 15.02.52
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -49,9 +49,11 @@ class dataCols(Enum):
     ATTIVAZIONE    = 6
     BACK           = 7
     RID            = 8
-    VAS            = 9
-    SIM            = 10
-    TV             = 11
+    RID_percent    = 9
+    VAS            = 10
+    VAS_percent    = 11
+    SIM            = 12
+    TV             = 13
 
 class HIERARCHY(Enum):
     Direttore         = 1
@@ -62,6 +64,46 @@ class HIERARCHY(Enum):
     Agente            = 6
 
 
+
+
+# def isAgentInContract(ag: str):
+#     from itertools import permutations
+#     # lista = [1, 2, 3, 4]
+#     lista=["Franco Cosimino", "Giuliano Yabandeh Jahromi", "Luigi Amato Euroma2 Pm"]
+#     if ag in lista:
+#         return True
+
+#     tk = ag.split()
+#     combinazioni = list(permutations(tk, len(tk)))
+#     for item in combinazioni:
+#         name=' '.join(item)
+#         if name in lista:
+#             print(name)
+
+
+    # print(combinaziqoni)
+
+
+    # for i in range(len(tk)):
+    #     name = tk[i:] + tk[0]
+
+
+    '''
+    import itertools
+
+    lista = ['a', 'b', 'c', 'd']
+
+    # Tutte le combinazioni di lunghezza 1 a 4
+    tutte_combinazioni = []
+    for r in range(1, len(lista)+1):
+        tutte_combinazioni.extend(itertools.combinations(lista, r))
+
+    for c in tutte_combinazioni:
+        print(c)
+    '''
+
+
+    # _list=["Franco Cosimino", "Giuliano Yabandeh Jahromi", "Luigi Amato Euroma2 Pm"]
 
 
 # -------------------------------
@@ -92,13 +134,15 @@ def readConfig():
 if __name__ == '__main__':
     global gv
 
-
+    # isAgentInContract("Loreto notarantonio")
+    # isAgentInContract("Luigi Amato Pm Euroma2")
+    # sys.exit()
     prj_name = "stefanoContratti"
 
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-05-07_084943"
+    __ln_version__=f"{prj_name} version: V2025-05-19_150252"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.excel_input_filename))
 

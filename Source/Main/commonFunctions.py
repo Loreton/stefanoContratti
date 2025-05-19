@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 07-05-2025 18.25.06
+# Date .........: 19-05-2025 20.18.39
 #
 
 
@@ -55,37 +55,6 @@ def result_columns():
 
 
 
-# def setTitle(ws):
-#     gray = 'b2b2b2'
-#     # formatting the header columns, filling red color
-#     for col in range(1, ws.max_column + 1):
-#        cell_header = ws.cell(1, col)
-#        cell_header.fill = PatternFill(start_color=gray, end_color=gray, fill_type="solid") #used hex code for red color
-
-
-# Auto-adjust Excel column widths
-# def setColumnSize(ws):
-
-#     from openpyxl.utils import get_column_letter
-#     for idx, col in enumerate(ws.columns, 1):
-#         ws.column_dimensions[get_column_letter(idx)].auto_size = True
-
-
-
-
-############################################################
-# cell_range = [ (row1, col1), (row2, col2), ...]
-############################################################
-# def setCellsColor(ws, cells: list, color='ffffa6'):
-#     # light_yellow_3 = 'ffffa6'
-#     # my_color = light_yellow_3
-
-#     for row, col in cells:
-#         curr_cell = ws.cell(row, col)
-#         curr_cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid") #used hex code for red color
-
-
-
 
 
 
@@ -97,41 +66,46 @@ def partnerData(agent_data: dict, partner_column: dict, somma: list):
 
         ptr = partner_column[partner]
 
-        ptr[0] += data[dc.PROCESSATI.name]
-        ptr[1] += data[dc.EXCLUDED.name]
-        ptr[2] += data[dc.INSERITI.name]
-        ptr[3] += data[dc.SCARTATI.name]
-        ptr[4] += data[dc.TOTALE.name]
-        ptr[5] += data[dc.CONFERMATI.name]
-        ptr[6] += data[dc.ATTIVAZIONE.name]
-        ptr[7] += data[dc.BACK.name]
-        ptr[8] += data[dc.RID.name]
-        ptr[9] += data[dc.VAS.name]
-        ptr[10] += data[dc.SIM.name]
-        ptr[11] += data[dc.TV.name]
 
+        ptr[dc.PROCESSATI.value] += data[dc.PROCESSATI.name]
+        ptr[dc.EXCLUDED.value] += data[dc.EXCLUDED.name]
+        ptr[dc.INSERITI.value] += data[dc.INSERITI.name]
+        ptr[dc.SCARTATI.value] += data[dc.SCARTATI.name]
+        ptr[dc.TOTALE.value] += data[dc.TOTALE.name]
+        ptr[dc.CONFERMATI.value] += data[dc.CONFERMATI.name]
+        ptr[dc.ATTIVAZIONE.value] += data[dc.ATTIVAZIONE.name]
+        ptr[dc.BACK.value] += data[dc.BACK.name]
+        ptr[dc.RID.value] += data[dc.RID.name]
+        ptr[dc.VAS.value] += data[dc.VAS.name]
+        ptr[dc.SIM.value] += data[dc.SIM.name]
+        ptr[dc.TV.value] += data[dc.TV.name]
 
+        # rid:x=totale:100 --> x = rid*100/totale
+        try:
+            if  ptr[dc.RID.value] > 0 and ptr[dc.TOTALE.value] > 0:
+                ptr[dc.RID_percent.value] = ptr[dc.RID.value] / ptr[dc.TOTALE.value]
+            if  ptr[dc.VAS.value] > 0 and ptr[dc.TOTALE.value] > 0:
+                ptr[dc.VAS_percent.value] = ptr[dc.VAS.value] / ptr[dc.TOTALE.value]
+        except (Exception) as e:
+            print(e)
+            import pdb; pdb.set_trace() # by Loreto
 
-        ### --- aggiorniamo il totale
-        somma[0] += data[dc.PROCESSATI.name]
-        somma[1] += data[dc.EXCLUDED.name]
-        somma[2] += data[dc.INSERITI.name]
-        somma[3] += data[dc.SCARTATI.name]
-        somma[4] += data[dc.TOTALE.name]
-        somma[5] += data[dc.CONFERMATI.name]
-        somma[6] += data[dc.ATTIVAZIONE.name]
-        somma[7] += data[dc.BACK.name]
-        somma[8] += data[dc.RID.name]
-        somma[9] += data[dc.VAS.name]
-        somma[10] += data[dc.SIM.name]
-        somma[11] += data[dc.TV.name]
+        somma[dc.PROCESSATI.value] += data[dc.PROCESSATI.name]
+        somma[dc.EXCLUDED.value] += data[dc.EXCLUDED.name]
+        somma[dc.INSERITI.value] += data[dc.INSERITI.name]
+        somma[dc.SCARTATI.value] += data[dc.SCARTATI.name]
+        somma[dc.TOTALE.value] += data[dc.TOTALE.name]
+        somma[dc.CONFERMATI.value] += data[dc.CONFERMATI.name]
+        somma[dc.ATTIVAZIONE.value] += data[dc.ATTIVAZIONE.name]
+        somma[dc.BACK.value] += data[dc.BACK.name]
+        somma[dc.RID.value] += data[dc.RID.name]
+        somma[dc.VAS.value] += data[dc.VAS.name]
+        somma[dc.SIM.value] += data[dc.SIM.name]
+        somma[dc.TV.value] += data[dc.TV.name]
 
+        if  somma[dc.RID.value] > 0 and somma[dc.TOTALE.value] > 0:
+            somma[dc.RID_percent.value] = somma[dc.RID.value] / somma[dc.TOTALE.value]
+        if  somma[dc.VAS.value] > 0 and somma[dc.TOTALE.value] > 0:
+            somma[dc.VAS_percent.value] = somma[dc.VAS.value] / somma[dc.TOTALE.value]
 
-
-
-def processAgentList(agent_list: list, partner_column: dict, somma: list):
-    for agent_name in agent_list:
-        gv.logger.info("    agent: %s", agent_name)
-        if agent_data:=gv.agent_results.get(agent_name): # se presente....
-            partnerData(agent_data=agent_data, partner_column=partner_column, somma=somma)
 
