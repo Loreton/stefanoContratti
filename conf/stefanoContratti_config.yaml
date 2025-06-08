@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 16.21.06
+# Date .........: 19-05-2025 14.14.31
 
 
 
@@ -11,7 +11,7 @@
 ___templates:
     ___resultStruct: &RESULT_STRUCTURE
             - Partner
-            - Processati
+            - Processati            # - tutti i record presenti nel file contratti
             - Excluded
             - Inseriti
             - Scartati
@@ -20,7 +20,9 @@ ___templates:
             - In attivazione
             - Back
             - RID
+            - RID%
             - VAS
+            - VAS%
             - SIM
             - TV
             # - xxxx
@@ -95,23 +97,25 @@ excel:
             - ESITO
 
     # -----------------------------------------------------------
-    # - keywords da verificare all'interno del campo ESITO
+    # - keywords se presenti all'interno del campo ESITO
     # - per permettere la catalogazione corretta dei contratti
     # -----------------------------------------------------------
     esito_keywords:
+
+        # - se trovate il record verrà escluso
         exclude:
             - doppia prenotazione
             - ko < 12 mesi
 
-        # totale:
-        #     include: all
-
+        # - se trovate il record verrà contato come confermato
         confermato:
             - confermato
 
+        # - se trovate il record verrà contato come "in attivazione"
         attivazione:
             - in attivazione
 
+        # - se trovate il record verrà contato come "back"
         back:
             - Attesa
             - Gestito
@@ -121,7 +125,13 @@ excel:
             - Accettato
 
 
+
+    # -----------------------------------------------------------
+    # - keywords se presenti all'interno del campo PRODOTTO
+    # - il campo potrebbe essere contato in più di una colonna
+    # -----------------------------------------------------------
     prodotto_keywords:
+        # - se trovate il record verrà contato nei rid
         rid:
             - rid
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 18.18.20
+# Date .........: 19-05-2025 20.20.16
 #
 
 
@@ -18,10 +18,11 @@ from openpyxl.styles import PatternFill
 
 
 # --- @Loreto: my lib
-import ln_pandasExcel_Class as lnExcel
+import lnPyExcel_Class as pe
+import lnOpenPyXL_Class as pyxl
 import lnUtils
 import dictUtils
-from ln_pandasExcel_Class import workBbookClass, sheetClass
+# from ln_pandasExcel_Class import workBbookClass, sheetClass
 
 import commonFunctions
 import Sheets
@@ -48,49 +49,12 @@ def setup(gVars: (dict, SimpleNamespace)):
 ################################################################
 def partnerPerAgente(d_src: dict):
     #-------------------------------------------------
-    def includeData_(word: str, include_list: list):
-        fConfirmed = False
-        for include_value in include_list:
-            if include_value in word:
-                fConfirmed = True
-                break
 
-        return fConfirmed
-
-
-    def excludeData_(word: str, exclude_list: list):
-        fExcluded = False
-        for excl_value in exclude_list:
-            if excl_value in word:
-                gv.logger.debug("excluding due to: %s", excl_value)
-                fExcluded = True
-                break
-
-        return fExcluded
-
-
-
-    def includeData_(source_list: list, search_list: list):
-        fConfirmed = False
-        common_items = [item for item in search_list if item in source_list]
-        if common_items:
-            fConfirmed = True
-        return fConfirmed
-
-
-    def excludeData_(source_list: list, search_list: list):
-        fExcluded = False
-        common_items = [item for item in search_list if item in source_list]
-        if common_items:
-            fConfirmed = True
-        return fExcluded
-
-
-###################################################################
-# compara un lista con un'altra.
-# Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
-# ...e si fa la comparazione con tutte le parole in AND
-###################################################################
+    #-----------------------------------------------------------------
+    # compara un lista con un'altra.
+    # Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
+    # ...e si fa la comparazione con tutte le parole in AND
+    #-----------------------------------------------------------------
     def includeData(source_list: list, search_list: list):
         fConfirmed = False
         for include_value in search_list:
@@ -107,11 +71,11 @@ def partnerPerAgente(d_src: dict):
 
         return fConfirmed
 
-###################################################################
-# compara un lista con un'altra.
-# Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
-# ...e si fa la comparazione con tutte le parole in AND
-###################################################################
+    #-----------------------------------------------------------------
+    # compara un lista con un'altra.
+    # Se un item della search_list contiene BLANK allora viene fatto lo split dell'elemento
+    # ...e si fa la comparazione con tutte le parole in AND
+    #-----------------------------------------------------------------
     def excludeData(source_list: list, search_list: list):
         fExcluded = False
         for exclude_value in search_list:
@@ -130,15 +94,15 @@ def partnerPerAgente(d_src: dict):
 
     #-------------------------------------------------
 
-    esito_exclude       = [v.lower() for v in gv.excel_config.esito_keywords.exclude]
-    esito_confermato    = [v.lower() for v in gv.excel_config.esito_keywords.confermato]
-    esito_attivazione   = [v.lower() for v in gv.excel_config.esito_keywords.attivazione]
-    esito_back          = [v.lower() for v in gv.excel_config.esito_keywords.back]
+    esito_exclude     = [v.lower() for v in gv.excel_config.esito_keywords.exclude]
+    esito_confermato  = [v.lower() for v in gv.excel_config.esito_keywords.confermato]
+    esito_attivazione = [v.lower() for v in gv.excel_config.esito_keywords.attivazione]
+    esito_back        = [v.lower() for v in gv.excel_config.esito_keywords.back]
 
-    prodotto_rid         = [v.lower() for v in gv.excel_config.prodotto_keywords.rid]
-    prodotto_vas         = [v.lower() for v in gv.excel_config.prodotto_keywords.vas]
-    prodotto_sim         = [v.lower() for v in gv.excel_config.prodotto_keywords.sim]
-    prodotto_tv          = [v.lower() for v in gv.excel_config.prodotto_keywords.tv]
+    prodotto_rid      = [v.lower() for v in gv.excel_config.prodotto_keywords.rid]
+    prodotto_vas      = [v.lower() for v in gv.excel_config.prodotto_keywords.vas]
+    prodotto_sim      = [v.lower() for v in gv.excel_config.prodotto_keywords.sim]
+    prodotto_tv       = [v.lower() for v in gv.excel_config.prodotto_keywords.tv]
 
     d = gv.myDict()
     dc=gv.dataCols
@@ -187,6 +151,7 @@ def partnerPerAgente(d_src: dict):
 
         if isValid:
             d[partner][dc.TOTALE.name] += 1
+
             ### --- verifichiamo i prodotti
             if includeData(prodotto, prodotto_rid):
                 d[partner][dc.RID.name] += 1
@@ -213,31 +178,57 @@ def partnerPerAgente(d_src: dict):
 
 
 ###########################################################################
-#
+# Per ogni agente presente nella struttura gerarchinca
+#   andiamo a prelevare i relativi rsultati dai contratti
+# Ho notato che alcuni nomi sono presenti
 ###########################################################################
-def insertAgentInStruct(main_dict: dict, agents: dict):
-    # print(agents.keys())
+def insertAgentInStruct(main_dict: dict, agent_contracts: dict):
+    from itertools import permutations
+    ## --- per comodità salviamo la list degli agenti usato nella subfunction
+    # agenti_in_contratto = [x.lower() for x in agent_contracts.keys()]
+    agenti_in_contratto = [x for x in agent_contracts.keys()]
+
+    #--------------------------------------------------
+    def agentInContract(ag: str):
+        # ag = ag.lower()
+        # print(len(lista))
+        # lista=["Franco Cosimino", "Giuliano Yabandeh Jahromi", "Luigi Amato Euroma2 Pm"]
+        if ag in agenti_in_contratto:
+            return True
+
+        tk = ag.split()
+        combinazioni = list(permutations(tk, len(tk)))
+        for item in combinazioni:
+            name=' '.join(item)
+            print(f"checking {name}  --- {ag}")
+            if name in agenti_in_contratto:
+                print("name modified: ", name)
+                return True
+        else:
+            print(ag)
+            import pdb; pdb.set_trace() # by Loreto
+
+        return False
+
+    #--------------------------------------------------
+
     file_contratti_dettagliati = gv.working_files.file_contratti_dettagliati
     separator = '.'
     key_paths = main_dict.keypaths(gv.struttura_aziendale)
 
-    fLoreto = True
-    fBenedict = not fLoreto
 
-    if fLoreto:
-        flatten_data = dictUtils.lnFlatten(main_dict, separator=separator, index=False)
-        agent_col=5
-        for item in flatten_data:
-            keypath = item.split(separator)
-            if len(keypath) >= agent_col:  ### colonna Agent
-                agent_name = keypath[-1]
-                if agent_name in agents.keys():
-                    gv.logger.info("adding %s results data", agent_name)
-                    this_agent = agents.pop(agent_name)
-                    agent_results=this_agent["results"]
-                    if isinstance(agent_results, dict):
-                        main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
-
+    flatten_data = dictUtils.lnFlatten(main_dict, separator=separator, index=False)
+    agent_col=5
+    for item in flatten_data:
+        keypath = item.split(separator)
+        if len(keypath) >= agent_col:  ### colonna Agent
+            agent_name = keypath[-1]
+            if agent_name in agent_contracts.keys():
+                gv.logger.info("adding %s results data", agent_name)
+                this_agent = agent_contracts.pop(agent_name)
+                agent_results=this_agent["results"]
+                if isinstance(agent_results, dict):
+                    main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
 
     dictUtils.toYaml(d=main_dict, filepath=file_contratti_dettagliati, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
@@ -263,6 +254,10 @@ def retrieveAgentData(d_src: dict, nome_agente: str):
 
 ### ##########################################################
 ### --- processiamo i contratti per ogni agente
+### provvediamo anche ad aggiustare il nome:
+###     -. eliminando extra BLANKs
+###     -. convertendo "o'" in "ò"
+###
 ### crea una struct:
 ###     agent_name:
 ###         partner1:
@@ -273,14 +268,14 @@ def retrieveAgentData(d_src: dict, nome_agente: str):
 ###         partner2:
 ###             ...:
 ### ##########################################################
-def retrieveContracts(contract_dict: dict, lista_agenti: list):
+def retrieveContractsForAgent(contract_dict: dict, lista_agenti: list):
     fDEBUG_SAVE_TO_YAML = False
     d = gv.myDict()
     for name in lista_agenti:
         gv.logger.info("processing agent: %s", name)
         name = name.replace("o'", "ò").replace("-", " ")
         name = lnUtils.remove_extra_blanks(data=name)
-        gv.logger.info("    compare name: %s", name)
+        gv.logger.info("    modified name: %s", name)
         d[name] = gv.myDict()
 
         ### -----------------------------
@@ -312,74 +307,75 @@ def retrieveContracts(contract_dict: dict, lista_agenti: list):
 ################################################################
 def Main(gVars: dict):
     gv.colonne_gerarchia   = gv.excel_config.output_sheet.colonne_gerarchia
-    gv.colonne_dati        = gv.excel_config.output_sheet.colonne_dati
+    # gv.colonne_dati        = gv.excel_config.output_sheet.colonne_dati
 
 
 
     sheet_name                 = gv.excel_config.source_sheet.name
     selected_columns           = gv.excel_config.source_sheet.columns_to_be_extracted
-    gv.excel_filename          = Path(gv.args.input_excel_filename).resolve()
-    agenti_excel_filename      = Path(gv.args.output_agenti_filename).resolve()
+    excel_input_filename       = Path(gv.args.excel_input_filename).resolve()
+    excel_output_filename      = Path(gv.args.excel_output_filename).resolve()
     file_agents_data           = Path(gv.working_files.file_agents_data).resolve()
     file_agents_results        = Path(gv.working_files.file_agents_results).resolve()
     file_contratti_preprocess  = Path(gv.working_files.file_contratti_preprocess).resolve()
     file_agenti_discrepanti    = Path(gv.working_files.file_agenti_discrepanti).resolve()
 
+
+
     ### -------------------------------
     ### --- read contracts data
     ### -------------------------------
-    gv.workBook  = workBbookClass(excel_filename=gv.excel_filename, logger=gv.logger)
-    sh_contratti = sheetClass(wbClass=gv.workBook, sheet_name_nr=0)
-    dict_contratti = sh_contratti.asDict(usecols=selected_columns, use_benedict=True)
+    gv.peWorkBook  = pe.WorkbookClass(excel_filename=excel_input_filename, logger=gv.logger)
+    sh_contratti = gv.peWorkBook.getSheetClass(sheet_name_nr=0)
+    dict_contratti = sh_contratti.asDict(usecols=selected_columns)
     dictUtils.toYaml(d=dict_contratti, filepath=file_contratti_preprocess, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-    gv.workBook.close()
-    # import pdb; pdb.set_trace() # by Loreto
 
 
     ### -------------------------------------
     ### --- estrazione dati agenti dal foglio contratti
     ### -------------------------------------
-    nomi_agenti = sh_contratti.readColumn(col_name="AGENTE", unique=True)
+    nomi_agenti = sh_contratti.getColumn(col_name="AGENTE", unique=True, header=False)
     gv.logger.info("nomi agenti: %s", nomi_agenti)
 
 
     ### -------------------------------------
     ### --- processiamo i contratti per ogni agente
     ### -------------------------------------
-    agents = retrieveContracts(contract_dict=dict_contratti, lista_agenti=nomi_agenti )
+    agent_contracts = retrieveContractsForAgent(contract_dict=dict_contratti, lista_agenti=nomi_agenti )
 
     ### -------------------------------------
     ### --- creazione due dict (che salviamo su yaml file)
     ### --- per eventuale verifica di un corretto calcolo
-    ### --- gv.agents_results sarà utile per il calcolo ai livelli superiori.
+    ### --- d_data              con i dati deti prelevati dai contratti
+    ### --- gv.agents_results   con i risultati dei dati processati
     ### -------------------------------------
     d_data = gv.myDict()
     gv.agent_results = gv.myDict()
-    for name in agents:
-        d_data[name]=agents[name]["data"]
-        gv.agent_results[name]=agents[name]["results"]
+    for name in agent_contracts:
+        d_data[name]=agent_contracts[name]["data"]
+        gv.agent_results[name]=agent_contracts[name]["results"]
 
     dictUtils.toYaml(d=d_data, filepath=file_agents_data, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
     dictUtils.toYaml(d=gv.agent_results, filepath=file_agents_results, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
 
     ### -------------------------------------
     ### --- inseriamo gli agenti nella struttura globale
-    ### --- gli agenti inseriti verranno rimossi dagli agenti trovati
-    ### --- in modo che se avanzano segnaliamo l'incongruenza
+    ### --- gli agenti inseriti verranno rimossi dagli agent_contracts
+    ### --- tutti quelli trovati nei contratti ma non presenti in struttura andranno in uno sheet dedicato
     ### -------------------------------------
-    insertAgentInStruct(main_dict=gv.struttura_aziendale, agents=agents)
+    insertAgentInStruct(main_dict=gv.struttura_aziendale, agent_contracts=agent_contracts)
 
 
-    gv.DF = []
+    # gv.DF = []
     gv.SHEETS = []
     gv.COLOR_CELLS = []
 
-    if len(agents):
+    if len(agent_contracts):
         gv.logger.warning("I seguenti agenti sono presenti nel foglio contratti, na non nella struttura")
-        for name in agents.keys():
+        for name in agent_contracts.keys():
             gv.logger.warning(" - %s", name)
-        dictUtils.toYaml(d=agents, filepath=file_agenti_discrepanti, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-        Sheets.agentiNonTrovati(agents=agents)
+        dictUtils.toYaml(d=agent_contracts, filepath=file_agenti_discrepanti, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+        Sheets.agentiNonTrovati(agents=agent_contracts)
 
 
 
@@ -400,24 +396,24 @@ def Main(gVars: dict):
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.TeamManager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Agente)
 
+    gv.peWorkBook.save(filename=excel_output_filename)
 
-    excel_file_path=gv.args.output_agenti_filename
-    excel_file_path=gv.excel_filename
 
-    lnExcel.addSheet(filename=excel_file_path, sheets=gv.SHEETS, dataFrames=gv.DF, sheet_exists="replace", mode='a')
+
 
     ### --- aggiustamento col_size e qualche colore
-    wb = openpyxl.load_workbook(excel_file_path)
-
+    pyxlWB = pyxl.WorkBookClass(filename=excel_output_filename, logger=gv.logger)
     for sh_name, cell_range in zip(gv.SHEETS, gv.COLOR_CELLS):
-        ws = wb[sh_name]
-
-        commonFunctions.setColumnSize(ws)
-        commonFunctions.setTitle(ws)
+        ws = pyxlWB.getSheet(sh_name)
+        ws.formattingHeader()
+        ws.setColumnCalulatedSize(offset=4)
         if cell_range:
-            commonFunctions.setCellsColor(ws, cells=cell_range, color='ffffa6')
-            ws.freeze_panes = ws['B2'] ## Freeze everything to left of B (that is A) and no columns to feeze
+            ws.setCellsColor(cells=cell_range, color='ffffa6')
+            ws.setFreezePanes(cell="B2")
 
-    wb.save(excel_file_path)
+        ws.setColumnPercent(row_range=range(2, ws.getRows()), col_name=gv.dataCols.RID_percent.name)
+        ws.setColumnPercent(row_range=range(2, ws.getRows()), col_name=gv.dataCols.VAS_percent.name)
+
+    pyxlWB.save()
 
 

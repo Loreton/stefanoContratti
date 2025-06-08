@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 05-05-2025 16.43.51
+# Date .........: 19-05-2025 15.02.52
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -49,9 +49,11 @@ class dataCols(Enum):
     ATTIVAZIONE    = 6
     BACK           = 7
     RID            = 8
-    VAS            = 9
-    SIM            = 10
-    TV             = 11
+    RID_percent    = 9
+    VAS            = 10
+    VAS_percent    = 11
+    SIM            = 12
+    TV             = 13
 
 class HIERARCHY(Enum):
     Direttore         = 1
@@ -64,11 +66,52 @@ class HIERARCHY(Enum):
 
 
 
+# def isAgentInContract(ag: str):
+#     from itertools import permutations
+#     # lista = [1, 2, 3, 4]
+#     lista=["Franco Cosimino", "Giuliano Yabandeh Jahromi", "Luigi Amato Euroma2 Pm"]
+#     if ag in lista:
+#         return True
+
+#     tk = ag.split()
+#     combinazioni = list(permutations(tk, len(tk)))
+#     for item in combinazioni:
+#         name=' '.join(item)
+#         if name in lista:
+#             print(name)
+
+
+    # print(combinaziqoni)
+
+
+    # for i in range(len(tk)):
+    #     name = tk[i:] + tk[0]
+
+
+    '''
+    import itertools
+
+    lista = ['a', 'b', 'c', 'd']
+
+    # Tutte le combinazioni di lunghezza 1 a 4
+    tutte_combinazioni = []
+    for r in range(1, len(lista)+1):
+        tutte_combinazioni.extend(itertools.combinations(lista, r))
+
+    for c in tutte_combinazioni:
+        print(c)
+    '''
+
+
+    # _list=["Franco Cosimino", "Giuliano Yabandeh Jahromi", "Luigi Amato Euroma2 Pm"]
+
+
 # -------------------------------
 # ----- Load configuration data
 # -------------------------------
 def readConfig():
     global gv
+    gv.exit_on_config_file_not_found = True
     config_file=f"{prj_name}_config.yaml"
 
     unresolved_fileout=f"{gv.tmp_dir}/full_config.yaml"
@@ -91,15 +134,17 @@ def readConfig():
 if __name__ == '__main__':
     global gv
 
-
-    prj_name = "stefanoG"
+    # isAgentInContract("Loreto notarantonio")
+    # isAgentInContract("Luigi Amato Pm Euroma2")
+    # sys.exit()
+    prj_name = "stefanoContratti"
 
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-05-05_164351"
+    __ln_version__=f"{prj_name} version: V2025-05-19_150252"
     args=ParseInput(__ln_version__)
-    excelFilename = Path(os.path.expandvars(args.input_excel_filename))
+    excelFilename = Path(os.path.expandvars(args.excel_input_filename))
 
     logger=setColoredLogger(logger_name=prj_name,
                             console_logger_level=args.log_console_level,
