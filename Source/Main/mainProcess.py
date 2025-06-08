@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 19-05-2025 20.20.16
+# Date .........: 08-06-2025 20.27.40
 #
 
 
@@ -11,7 +11,7 @@ from pathlib import Path
 from benedict import benedict
 from types import SimpleNamespace
 
-import pandas as pd
+# import pandas as pd
 import  openpyxl
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
