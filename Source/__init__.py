@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 06-05-2025 16.18.49
+# Date .........: 08-06-2025 20.08.02
 
 
 
@@ -42,9 +42,13 @@ def set_path():
         _my_path.append(script_name.parent)
 
         ### creiamo lnLib.zip per avere i moduli aggiornati al momento
-        lnLib_zip = f"{prj_dir}/Source/LnLib.zip"
-        ZIP.zip_dir_with_extensions(source_dir=f'{prj_dir}/Source/lnLib_links', zip_filename=lnLib_zip, extensions=['.py'] )
-        print(lnLib_zip, "has been created")
+
+        import socket
+        hostname = socket.gethostname()
+        if hostname.lower() in ["asusp2520l"]:
+            lnLib_zip = f"{prj_dir}/Source/LnLib.zip"
+            ZIP.zip_dir_with_extensions(source_dir=f'{prj_dir}/Source/lnLib_links', zip_filename=lnLib_zip, extensions=['.py'] )
+            print(lnLib_zip, "has been created")
 
     _my_path.append(prj_dir)
     _my_path.append(f'{prj_dir}/Source')
