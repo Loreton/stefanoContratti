@@ -3,13 +3,13 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 19-05-2025 15.02.52
+# Date .........: 08-06-2025 20.24.59
 
 import sys; sys.dont_write_bytecode=True
 import os
 from benedict import benedict
 from pathlib import Path
-import pandas as pd
+# import pandas as pd
 from enum import Enum
 
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-05-19_150252"
+    __ln_version__=f"{prj_name} version: V2025-06-08_202459"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.excel_input_filename))
 
