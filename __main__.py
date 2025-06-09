@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 08-06-2025 20.24.59
+# Date .........: 09-06-2025 08.05.14
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -115,7 +115,7 @@ def readConfig():
     config_file=f"{prj_name}_config.yaml"
 
     unresolved_fileout=f"{gv.tmp_dir}/full_config.yaml"
-    if not (full_config:=FileLoader.loadConfigurationData(config_file=config_file, save_yaml_on_file=unresolved_fileout) ):
+    if not (full_config:=FileLoader.loadConfigurationData(config_file=config_file, save_yaml_on_file=unresolved_fileout, set_system_variables=False) ):
         logger.error("Configuration data error")
         sys.exit(1)
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-06-08_202459"
+    __ln_version__=f"{prj_name} version: V2025-06-09_080514"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.excel_input_filename))
 
