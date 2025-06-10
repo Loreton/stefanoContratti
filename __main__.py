@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 09-06-2025 08.05.14
+# Date .........: 10-06-2025 18.05.13
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -13,7 +13,7 @@ from pathlib import Path
 from enum import Enum
 
 
-
+## ciao Laura
 #=======================================
 # - Project modules
 #=======================================
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-06-09_080514"
+    __ln_version__=f"{prj_name} version: V2025-06-10_180513"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.excel_input_filename))
 
