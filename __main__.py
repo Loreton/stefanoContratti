@@ -3,7 +3,7 @@
 # -*- coding: iso-8859-1 -*-
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 10-06-2025 18.05.13
+# Date .........: 01-07-2025 14.59.34
 
 import sys; sys.dont_write_bytecode=True
 import os
@@ -66,46 +66,6 @@ class HIERARCHY(Enum):
 
 
 
-# def isAgentInContract(ag: str):
-#     from itertools import permutations
-#     # lista = [1, 2, 3, 4]
-#     lista=["Franco Cosimino", "Giuliano Yabandeh Jahromi", "Luigi Amato Euroma2 Pm"]
-#     if ag in lista:
-#         return True
-
-#     tk = ag.split()
-#     combinazioni = list(permutations(tk, len(tk)))
-#     for item in combinazioni:
-#         name=' '.join(item)
-#         if name in lista:
-#             print(name)
-
-
-    # print(combinaziqoni)
-
-
-    # for i in range(len(tk)):
-    #     name = tk[i:] + tk[0]
-
-
-    '''
-    import itertools
-
-    lista = ['a', 'b', 'c', 'd']
-
-    # Tutte le combinazioni di lunghezza 1 a 4
-    tutte_combinazioni = []
-    for r in range(1, len(lista)+1):
-        tutte_combinazioni.extend(itertools.combinations(lista, r))
-
-    for c in tutte_combinazioni:
-        print(c)
-    '''
-
-
-    # _list=["Franco Cosimino", "Giuliano Yabandeh Jahromi", "Luigi Amato Euroma2 Pm"]
-
-
 # -------------------------------
 # ----- Load configuration data
 # -------------------------------
@@ -114,18 +74,19 @@ def readConfig():
     gv.exit_on_config_file_not_found = True
     config_file=f"{prj_name}_config.yaml"
 
-    unresolved_fileout=f"{gv.tmp_dir}/full_config.yaml"
+    unresolved_fileout=f"{gv.tmpPath}/full_config.yaml"
     if not (full_config:=FileLoader.loadConfigurationData(config_file=config_file, save_yaml_on_file=unresolved_fileout, set_system_variables=False) ):
         logger.error("Configuration data error")
         sys.exit(1)
 
-    gv.excel_config         = full_config.pop("excel") ### extrai la parte sqlite
-    gv.struttura_aziendale  = full_config.pop("StrutturaAziendale") ### extrai la parte sqlite
-    gv.working_files        = full_config.pop("working_files") ### extrai la parte sqlite
+    gv.excel_config         = full_config.pop("excel")
+    gv.struttura_aziendale  = full_config.pop("StrutturaAziendale")
+    gv.working_files        = full_config.pop("working_files")
     # gv.COLS = COLS
     gv.HIERARCHY = HIERARCHY
     gv.dataCols   = dataCols
-    # gv.output_sheet         = full_config.pop("output_sheet") ### extrai la parte sqlite
+    # gv.output_sheet         = full_config.pop("output_sheet")
+
 
 
 #######################################################
@@ -142,7 +103,7 @@ if __name__ == '__main__':
     # ----------------------------
     # ----- logging
     # ----------------------------
-    __ln_version__=f"{prj_name} version: V2025-06-10_180513"
+    __ln_version__=f"{prj_name} version: V2025-07-01_145934"
     args=ParseInput(__ln_version__)
     excelFilename = Path(os.path.expandvars(args.excel_input_filename))
 

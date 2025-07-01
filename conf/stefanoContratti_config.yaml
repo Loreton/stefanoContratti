@@ -1,7 +1,7 @@
 # main configuration file
 
 # updated by ...: Loreto Notarantonio
-# Date .........: 19-05-2025 14.14.31
+# Date .........: 01-07-2025 10.50.28
 
 
 
@@ -58,11 +58,12 @@ StrutturaAziendale:
 
 
 working_files:
-    file_agents_data:           "data_output/agents_data.yaml"
-    file_agents_results:        "data_output/agents_results.yaml"
-    file_contratti_preprocess:  "data_output/contratti_preprocess.yaml"
-    file_contratti_dettagliati: "data_output/contratti_dettagliati.yaml"
-    file_agenti_discrepanti:    "data_output/agenti_discrepanti.yaml"
+    agents_data:           "data_output/agents_data.yaml"
+    agents_results:        "data_output/agents_results.yaml"
+    contratti_preprocess:  "data_output/contratti_preprocess.yaml"
+    contratti_dettagliati: "data_output/contratti_dettagliati.yaml"
+    agenti_discrepanti:    "data_output/agenti_discrepanti.yaml"
+    struttura_aziendale:   "data_output/struttura_aziendale_input.yaml"
 
 
 excel:

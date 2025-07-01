@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 08-06-2025 20.27.40
+# Date .........: 01-07-2025 16.40.52
 #
 
 
@@ -185,7 +185,6 @@ def partnerPerAgente(d_src: dict):
 def insertAgentInStruct(main_dict: dict, agent_contracts: dict):
     from itertools import permutations
     ## --- per comodità salviamo la list degli agenti usato nella subfunction
-    # agenti_in_contratto = [x.lower() for x in agent_contracts.keys()]
     agenti_in_contratto = [x for x in agent_contracts.keys()]
 
     #--------------------------------------------------
@@ -212,9 +211,10 @@ def insertAgentInStruct(main_dict: dict, agent_contracts: dict):
 
     #--------------------------------------------------
 
-    file_contratti_dettagliati = gv.working_files.file_contratti_dettagliati
+    file_contratti_dettagliati = gv.working_files.contratti_dettagliati
     separator = '.'
-    key_paths = main_dict.keypaths(gv.struttura_aziendale)
+    # key_paths = main_dict.keypaths(gv.struttura_aziendale)
+    # import pdb; pdb.set_trace() # by Loreto
 
 
     flatten_data = dictUtils.lnFlatten(main_dict, separator=separator, index=False)
@@ -229,9 +229,10 @@ def insertAgentInStruct(main_dict: dict, agent_contracts: dict):
                 agent_results=this_agent["results"]
                 if isinstance(agent_results, dict):
                     main_dict[keypath] = agent_results ### sfrutto la capacita di benedict per puntare ad un keypath
+            else:
+                gv.agents_not_in_contracts.append(agent_name) # --- @Loreto:  01-07-2025 15:55:18
 
     dictUtils.toYaml(d=main_dict, filepath=file_contratti_dettagliati, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-
 
 
 
@@ -247,6 +248,10 @@ def retrieveAgentData(d_src: dict, nome_agente: str):
         if value["AGENTE"] == nome_agente:
             contract_id = value.pop("SPEEDY_CTR_ID")
             d[contract_id] = value
+            gv.logger.info(f"Agente: {nome_agente} found")
+            break
+    else:
+        gv.logger.error(f"Agente: {nome_agente} NOT found in contracts")
 
     return d
 
@@ -307,23 +312,31 @@ def retrieveContractsForAgent(contract_dict: dict, lista_agenti: list):
 ################################################################
 def Main(gVars: dict):
     gv.colonne_gerarchia   = gv.excel_config.output_sheet.colonne_gerarchia
-    # gv.colonne_dati        = gv.excel_config.output_sheet.colonne_dati
-
-
-
-    sheet_name                 = gv.excel_config.source_sheet.name
-    selected_columns           = gv.excel_config.source_sheet.columns_to_be_extracted
-    excel_input_filename       = Path(gv.args.excel_input_filename).resolve()
-    excel_output_filename      = Path(gv.args.excel_output_filename).resolve()
-    file_agents_data           = Path(gv.working_files.file_agents_data).resolve()
-    file_agents_results        = Path(gv.working_files.file_agents_results).resolve()
-    file_contratti_preprocess  = Path(gv.working_files.file_contratti_preprocess).resolve()
-    file_agenti_discrepanti    = Path(gv.working_files.file_agenti_discrepanti).resolve()
 
 
 
     ### -------------------------------
-    ### --- read contracts data
+    ### --- identifichiamo i nomi dei vai file
+    ### -------------------------------
+    sheet_name                 = gv.excel_config.source_sheet.name
+    selected_columns           = gv.excel_config.source_sheet.columns_to_be_extracted
+    excel_input_filename       = Path(gv.args.excel_input_filename).resolve()
+    excel_output_filename      = Path(gv.args.excel_output_filename).resolve()
+    file_agents_data           = Path(gv.working_files.agents_data).resolve()
+    file_struttura_aziendale   = Path(gv.working_files.agents_data).resolve()
+    file_agents_results        = Path(gv.working_files.agents_results).resolve()
+    file_contratti_preprocess  = Path(gv.working_files.contratti_preprocess).resolve()
+    file_agenti_discrepanti    = Path(gv.working_files.agenti_discrepanti).resolve()
+    file_struttura_aziendale    = Path(gv.working_files.struttura_aziendale).resolve()
+
+    dictUtils.toYaml(d=gv.struttura_aziendale, filepath=file_struttura_aziendale, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
+    gv.agents_not_in_contracts = []
+    # --- @Loreto:  01-07-2025 estrarre un file con i nomi agenti per confrontarli con quelli sul foglio excel
+
+
+    ### -------------------------------
+    ### --- read contracts data from excel
+    ### --- and create a dictionary with selected columns
     ### -------------------------------
     gv.peWorkBook  = pe.WorkbookClass(excel_filename=excel_input_filename, logger=gv.logger)
     sh_contratti = gv.peWorkBook.getSheetClass(sheet_name_nr=0)
@@ -332,14 +345,28 @@ def Main(gVars: dict):
 
 
     ### -------------------------------------
-    ### --- estrazione dati agenti dal foglio contratti
+    ### --- normalizzazione dei nomi nei contratti # --- @Loreto:  01-07-2025 15:54:09
     ### -------------------------------------
-    nomi_agenti = sh_contratti.getColumn(col_name="AGENTE", unique=True, header=False)
+    nomi_agenti=[]
+    for k, v in dict_contratti.items():
+        cur_name = v["AGENTE"]
+        new_name = cur_name.replace("o'", "ò").replace("-", " ")
+        new_name = lnUtils.remove_extra_blanks(data=new_name)
+        if not new_name == cur_name:
+            v["AGENTE"] = new_name
+            gv.logger.warning(f"modified name: from {cur_name} to: {new_name}")
+            cur_name = v["AGENTE"]
+
+        if not cur_name in nomi_agenti:
+            nomi_agenti.append(cur_name)
+
+
     gv.logger.info("nomi agenti: %s", nomi_agenti)
 
 
     ### -------------------------------------
     ### --- processiamo i contratti per ogni agente
+    ### --- estrazione dati agenti dal foglio contratti
     ### -------------------------------------
     agent_contracts = retrieveContractsForAgent(contract_dict=dict_contratti, lista_agenti=nomi_agenti )
 
@@ -370,14 +397,6 @@ def Main(gVars: dict):
     gv.SHEETS = []
     gv.COLOR_CELLS = []
 
-    if len(agent_contracts):
-        gv.logger.warning("I seguenti agenti sono presenti nel foglio contratti, na non nella struttura")
-        for name in agent_contracts.keys():
-            gv.logger.warning(" - %s", name)
-        dictUtils.toYaml(d=agent_contracts, filepath=file_agenti_discrepanti, indent=4, sort_keys=False, stacklevel=0, onEditor=False)
-        Sheets.agentiNonTrovati(agents=agent_contracts)
-
-
 
 
     ### -------------------------------------
@@ -385,10 +404,12 @@ def Main(gVars: dict):
     ### -------------------------------------
     gv.flatten_data = dictUtils.lnFlatten(gv.struttura_aziendale, separator='#', index=True)
     gv.flatten_keys = list(gv.flatten_data.keys())
-
     gv.keypaths_list = dictUtils.flatten_keypaths_to_list(gv.flatten_keys, separator="#", item_nrs=6)
 
 
+    ### -------------------------------------
+    ### --- creiamo gli sheets
+    ### -------------------------------------
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Direttore)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.AreaManager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.ManagerPlus)
@@ -396,12 +417,28 @@ def Main(gVars: dict):
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.TeamManager)
     Sheets.create(d=gv.struttura_aziendale, hierarchy_level=gv.HIERARCHY.Agente)
 
-    gv.peWorkBook.save(filename=excel_output_filename)
+
+    ### -------------------------------------
+    ### --- creiamo gli sheets anche per agenti non trovati
+    ### -------------------------------------
+    if len(agent_contracts):
+        Sheets.agentiNonTrovati(agents=agent_contracts, sh_name="Unsresolved_Contracts_Agents", descr="I seguenti agenti sono presenti nel foglio contratti, na non nella struttura")
+
+    if len(gv.agents_not_in_contracts):
+        Sheets.agentiNonTrovati(agents=gv.agents_not_in_contracts, sh_name="Orphans_Hierarchy_Agents", descr="I seguenti agenti sono presenti nella struttura ma non nel foglio contratti")
+
+
+    ### -------------------------------------
+    ### --- chiudiamo file excel
+    ### -------------------------------------
+    gv.peWorkBook.save(filename=str(excel_output_filename))
 
 
 
 
-    ### --- aggiustamento col_size e qualche colore
+    ### -------------------------------------
+    ### --- riapriamo ed aggiustamento col_size e qualche colore
+    ### -------------------------------------
     pyxlWB = pyxl.WorkBookClass(filename=excel_output_filename, logger=gv.logger)
     for sh_name, cell_range in zip(gv.SHEETS, gv.COLOR_CELLS):
         ws = pyxlWB.getSheet(sh_name)
@@ -415,5 +452,19 @@ def Main(gVars: dict):
         ws.setColumnPercent(row_range=range(2, ws.getRows()), col_name=gv.dataCols.VAS_percent.name)
 
     pyxlWB.save()
+
+
+
+    ### -------------------------------------
+    ### --- Solo come debug per assicurarci che non abbiamo mancato qualche agente
+    ### -------------------------------------
+    for name in gv.agents_not_in_contracts:
+        if name in agent_contracts.keys():
+            gv.logger.error(" - %s --- COME MAI????", name)
+    for name in agent_contracts.keys():
+        if name in gv.agents_not_in_contracts:
+            gv.logger.error(" - %s --- COME MAI????", name)
+        # else:
+        #     gv.logger.info(" - %s --- ok", name)
 
 

@@ -2,7 +2,7 @@
 
 #===============================================
 # updated by ...: Loreto Notarantonio
-# Date .........: 07-05-2025 18.26.34
+# Date .........: 01-07-2025 14.59.13
 #===============================================
 
 import sys; sys.dont_write_bytecode=True
@@ -41,7 +41,7 @@ def setMainVars(logger, prj_name, input_args, type: str=None, search_paths: list
     gv.date:      str       = datetime.now().strftime("%Y%m%d")
     gv.now: str             = datetime.now().strftime("%d-%m-%Y_%H:%M")
     gv.script_path          = Path(sys.argv[0]).resolve()
-    gv.tmp_dir              = f"/tmp/{prj_name}"
+    gv.tmpPath              = f"/tmp/{prj_name}"
     gv.hostname             = socket.gethostname().split()[0]
 
     gv.dry_run              =  not gv.args.go

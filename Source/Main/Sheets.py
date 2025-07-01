@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 19-05-2025 17.00.40
+# Date .........: 01-07-2025 16.32.57
 #
 
 
@@ -145,13 +145,41 @@ def create(d: dict, hierarchy_level):
 #######################################################################
 #
 #######################################################################
-def agentiNonTrovati(agents: list):
+def agentiNonTrovati_(agents: list):
     ### - creiamo il dataFrame
     sh_name = "Unsresolved_Agents"
     title_row = ["Agents_not_present_in_Structure"]
     rows_data = []
     for agent_name in list(agents.keys()):
         rows_data.append([agent_name])
+
+    gv.peWorkBook.addSheet(sheet_name=sh_name, col_names=title_row, data_rows=rows_data, replace=True)
+
+    # gv.DF.append(df)
+    gv.SHEETS.append(sh_name)
+    gv.COLOR_CELLS.append(None)
+
+
+#######################################################################
+#
+#######################################################################
+def agentiNonTrovati(agents: (list, dict), sh_name: str, descr: str):
+    ### - creiamo il dataFrame
+
+    gv.logger.warning(" - %s", descr)
+    title_row = [descr]
+    rows_data = []
+    if isinstance(agents, dict):
+        for agent_name in list(agents.keys()):
+            rows_data.append([agent_name])
+            gv.logger.notify(" - %s", agent_name)
+    elif isinstance(agents, list):
+        for agent_name in agents:
+            rows_data.append([agent_name])
+            gv.logger.notify(" - %s", agent_name)
+
+    else:
+        return
 
     gv.peWorkBook.addSheet(sheet_name=sh_name, col_names=title_row, data_rows=rows_data, replace=True)
 
