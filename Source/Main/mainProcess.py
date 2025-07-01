@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # updated by ...: Loreto Notarantonio
-# Date .........: 01-07-2025 16.40.52
+# Date .........: 01-07-2025 19.33.45
 #
 
 
@@ -278,9 +278,9 @@ def retrieveContractsForAgent(contract_dict: dict, lista_agenti: list):
     d = gv.myDict()
     for name in lista_agenti:
         gv.logger.info("processing agent: %s", name)
-        name = name.replace("o'", "ò").replace("-", " ")
-        name = lnUtils.remove_extra_blanks(data=name)
-        gv.logger.info("    modified name: %s", name)
+        # name = name.replace("o'", "ò").replace("-", " ")
+        # name = lnUtils.remove_extra_blanks(data=name)
+        # gv.logger.info("    modified name: %s", name)
         d[name] = gv.myDict()
 
         ### -----------------------------
